@@ -1,8 +1,8 @@
 public class Operator {
     protected Operator leadsTo; //block thing only has 1 output
     protected Operator previous1;
-    protected Operator previous2; //could be null if only takes 1 input
-    protected boolean source;   //if prev 1 and 2 are null then its a source block
+    protected Operator previous2; //could be null if it only takes 1 input
+    protected boolean source;   //if prev 1 and 2 are null then it's a source block
                                 // and you check n for signal
 
     public Operator getNext() {
@@ -24,6 +24,12 @@ public class Operator {
         previous2 = n;
     }
     public boolean getOutput(){ //should run when there is no more previous
-            return source;
+            if (previous1 == null){ //if previous1 is null then 2 is also null by default
+                return source;      //and thus has no inputs, therefore taking source as output
+            }
+            else if (previous2 == null){ //true when one input and basically just follows it through
+                return previous1.getOutput();
+            }
+            return true; //default is on or something
     }
 }
