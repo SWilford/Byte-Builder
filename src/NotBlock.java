@@ -1,5 +1,5 @@
 public class NotBlock extends Operator{
-    public boolean getOutPut(){
+    public boolean getOutput(){
         return !previous1.getOutput();
     }
 }
