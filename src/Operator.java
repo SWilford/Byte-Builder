@@ -16,7 +16,7 @@ public class Operator {
     public void setPrev1(Operator n){
         previous1 = n;
     }
-    public boolean getOutput(){ //should run when there is no more previous
+    public boolean getOutput(){     //should run when there is no more previous
             if (previous1 == null){ //if previous1 is null then 2 is also null by default
                 return source;      //and thus has no inputs, therefore taking source as output
             }
