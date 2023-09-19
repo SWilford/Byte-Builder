@@ -6,7 +6,11 @@ import java.awt.*;
 public class GUI extends JPanel implements MouseListener, MouseMotionListener {
 
     private final ArrayList<Button> buttons = new ArrayList<>();
-    //private final [][] operators = new [75][75];
+    private final Operator [][] operators = new Operator[25][25];
+
+    public int toolHeld = 0;
+    public boolean toolSelected;
+    public ArrayList<Button> toolButtons = new ArrayList<>();
 
     private static int mouseX;
     private static int mouseY;
@@ -15,6 +19,12 @@ public class GUI extends JPanel implements MouseListener, MouseMotionListener {
 
     private final ImageIcon gridSquareImg = new ImageIcon("Images/gridSquare.png");
     private final ImageIcon gridSquareImg2 = new ImageIcon("Images/gridSquare2.png");
+    private final ImageIcon wireToolImg = new ImageIcon("Images/copwire.png");
+    private final ImageIcon wireToolImg2 = new ImageIcon("Images/copwire2.png");
+    private final ImageIcon andImage = new ImageIcon("Images/AndGate.png");
+    private final ImageIcon andImage2 = new ImageIcon("Images/AndGate2.png");
+    private final ImageIcon notImage = new ImageIcon("Images/NotGate.png");
+    private final ImageIcon notImage2 = new ImageIcon("Images/NotGate2.png");
 
     //End of Image Icons
 
@@ -25,10 +35,16 @@ public class GUI extends JPanel implements MouseListener, MouseMotionListener {
         mouseX = 0;
         mouseY = 0;
         createGridButtons();
+        createToolbar();
+        toolHeld = 0;
+        toolSelected = false;
     }
 
     public void display(Graphics g) {
         for(Button b:buttons) {
+            b.drawButton(g);
+        }
+        for(Button b:toolButtons) {
             b.drawButton(g);
         }
     }
@@ -39,17 +55,93 @@ public class GUI extends JPanel implements MouseListener, MouseMotionListener {
     }
 
     private void createGridButtons() {
+        int row = 0;
         for(int x = 240; x < 1440; x+=48) {
+            int col = 0;
             for(int y = 0; y < 1200; y+=48) {
                 Shape gridShape = new Rectangle(x, y, 48, 48);
-                Button button = new Button(gridShape, "gridSquare", gridSquareImg, gridSquareImg2);
+                Button button = new Button(gridShape, "gridSquare", gridSquareImg, gridSquareImg2, row, col);
                 buttons.add(button);
+                col++;
             }
+            row++;
         }
+    }
+
+    private void createToolbar() {
+        Shape toolSquare1 = new Rectangle(0, 0, 120, 120);
+        Button wireButton = new Button(toolSquare1, "wire", wireToolImg, wireToolImg2);
+        toolButtons.add(wireButton);
+        Shape toolSquare2 = new Rectangle(120, 0, 120, 120);
+        Button notButton = new Button(toolSquare2, "not", notImage, notImage2);
+        toolButtons.add(notButton);
+        Shape toolSquare3 = new Rectangle(0, 120, 120, 120);
+        Button andButton = new Button(toolSquare3, "and", andImage, andImage2);
+        toolButtons.add(andButton);
     }
 
 
     public void mouseClicked(MouseEvent e) {
+        int button = e.getButton();
+        if(button == MouseEvent.BUTTON1) {
+            for(Button b : toolButtons) {
+                if(b.getShape().contains(mouseX, mouseY)) {
+                    switch(b.getTitle()) {
+                        case "wire" -> {
+                            if(!toolSelected) {
+                                toolSelected = true;
+                                toolHeld = 1;
+                            }
+                            else if(toolHeld == 1){
+                                toolSelected = false;
+                                toolHeld = 0;
+                            }
+                        }
+                        case "not" -> {
+                            if(!toolSelected) {
+                                toolSelected = true;
+                                toolHeld = 2;
+                            }
+                            else if(toolHeld == 2){
+                                toolSelected = false;
+                                toolHeld = 0;
+                            }
+                        }
+                        case "and" -> {
+                            if(!toolSelected) {
+                                toolSelected = true;
+                                toolHeld = 3;
+                            }
+                            else if(toolHeld == 3){
+                                toolSelected = false;
+                                toolHeld = 0;
+                            }
+                        }
+                    }
+                }
+            }
+            for(Button b : buttons) {
+                if(b.getShape().contains(mouseX, mouseY)) {
+                    int tempRow = b.getRow();
+                    int tempCol = b.getCol();
+                    switch (toolHeld) {
+                        case 2 -> {
+                            NotBlock notBlock = new NotBlock(null);
+                            System.out.println(tempRow+" "+tempCol);
+                            operators[tempRow][tempCol] = notBlock;
+                            b.setRegularImage(notImage);
+                            b.setHighlightImage(notImage2);
+                        }
+                        case 3 -> {
+                            NotBlock notBlock = new NotBlock(null);
+                            operators[tempRow][tempCol] = notBlock;
+                            b.setRegularImage(andImage);
+                            b.setHighlightImage(andImage2);
+                        }
+                    }
+                }
+            }
+        }
 
     }
 
@@ -57,6 +149,14 @@ public class GUI extends JPanel implements MouseListener, MouseMotionListener {
         mouseX = e.getX();
         mouseY = e.getY();
         for(Button b: buttons) {
+            if(b.getShape().contains(mouseX, mouseY)) {
+                b.highlight();
+            }
+            else {
+                b.unHighlight();
+            }
+        }
+        for(Button b: toolButtons) {
             if(b.getShape().contains(mouseX, mouseY)) {
                 b.highlight();
             }
