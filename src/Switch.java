@@ -2,7 +2,7 @@ public class Switch extends Operator{
     private boolean state; //holds a boolean on itself rather doing calculations from previous operators
 
     public Switch(){
-        state = false;
+        state = false;    //defaults to false
         previous1 = null; //no previous
     }
     public boolean getOutput(){
