@@ -4,27 +4,32 @@ import java.awt.*;
 public class Button {
     private final Shape shape; //The bounding box for the button
     private final String title; //Title for the button
-    private ImageIcon image, regularImage, highlightImage; //image is the base image, rI is the base image, hI is the image when button is hovered over
+    private ImageIcon image; //Stores the base image
+    private Color color, baseColor, highlightColor;
+
+    private Color toolbarHighlightColor = new Color(75, 75, 75);
 
     private int row, col; //Stores row and col of button in the 2d array of components
 
 
-    public Button(Shape s, String t, ImageIcon ri, ImageIcon hi) {
+    public Button(Shape s, String t, ImageIcon i) {
         shape = s;
         title = t;
-        regularImage = ri;
-        highlightImage = hi;
-        image = regularImage;
+        image = i;
+        baseColor = new Color(48, 48, 48);
+        highlightColor = new Color(90, 90, 90);
+        color = baseColor;
     }
 
-    public Button(Shape s, String t, ImageIcon ri, ImageIcon hi, int rw, int cl) {
+    public Button(Shape s, String t, ImageIcon i, int r, int c) {
         shape = s;
         title = t;
-        regularImage = ri;
-        highlightImage = hi;
-        image = regularImage;
-        row = rw;
-        col = cl;
+        image = i;
+        row = r;
+        col = c;
+        baseColor = new Color(48, 48, 48);
+        highlightColor = new Color(90, 90, 90);
+        color = baseColor;
     }
 
     public int getRow() {return row;}
@@ -40,11 +45,15 @@ public class Button {
     }
 
     public void highlight() {
-        image = highlightImage;
+        color = highlightColor;
     }
 
     public void unHighlight() {
-        image = regularImage;
+        color = baseColor;
+    }
+
+    public Color getColor() {
+        return color;
     }
 
     public void drawButton(Graphics g) {
@@ -52,7 +61,9 @@ public class Button {
         int y = (int)(this.getShape().getBounds().getY());
         int width = (int)(this.getShape().getBounds().getWidth());
         int height = (int)(this.getShape().getBounds().getHeight());
+        g.setColor(this.getColor());
         if(image != null) {
+            g.fillRect(x, y, width, height);
             g.drawImage(image.getImage(), x, y, width, height, null);
         }
         else if(this.getShape() instanceof Rectangle) {
@@ -67,14 +78,7 @@ public class Button {
     }
 
     public void setRegularImage(ImageIcon img) {
-        regularImage = img;
+        image = img;
     }
-
-    public void setHighlightImage(ImageIcon img) {
-        highlightImage = img;
-    }
-
-
-
 
 }
