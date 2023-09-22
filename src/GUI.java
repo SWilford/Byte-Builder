@@ -144,7 +144,7 @@ public class GUI extends JPanel implements MouseListener, MouseMotionListener {
                 }
             }
         }
-
+        repaint();
     }
 
     public void mouseMoved(MouseEvent e) {
