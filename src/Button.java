@@ -7,6 +7,8 @@ public class Button {
     private ImageIcon image; //Stores the base image
     private Color color, baseColor, highlightColor;
 
+    private boolean toolbarColored;
+
     private Color toolbarHighlightColor = new Color(75, 75, 75);
 
     private int row, col; //Stores row and col of button in the 2d array of components
@@ -19,6 +21,7 @@ public class Button {
         baseColor = new Color(48, 48, 48);
         highlightColor = new Color(90, 90, 90);
         color = baseColor;
+        toolbarColored = false;
     }
 
     public Button(Shape s, String t, ImageIcon i, int r, int c) {
@@ -30,6 +33,7 @@ public class Button {
         baseColor = new Color(48, 48, 48);
         highlightColor = new Color(90, 90, 90);
         color = baseColor;
+        toolbarColored = false;
     }
 
     public int getRow() {return row;}
@@ -52,8 +56,22 @@ public class Button {
         color = baseColor;
     }
 
+    public void toolbarHighlight() {
+        baseColor = toolbarHighlightColor;
+        color = baseColor;
+        toolbarColored = true;
+    }
+    public void resetToolbarColor() {
+        baseColor = new Color(48, 48, 48);
+        toolbarColored = false;
+    }
+
     public Color getColor() {
         return color;
+    }
+
+    public boolean isToolbarColored() {
+        return toolbarColored;
     }
 
     public void drawButton(Graphics g) {

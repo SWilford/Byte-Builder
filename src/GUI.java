@@ -8,7 +8,7 @@ public class GUI extends JPanel implements MouseListener, MouseMotionListener {
     private final ArrayList<Button> buttons = new ArrayList<>();
     private final Operator [][] operators = new Operator[25][25];
 
-    public int toolHeld = 0;
+    public String toolHeld = "";
     public boolean toolSelected;
     public ArrayList<Button> toolButtons = new ArrayList<>();
 
@@ -18,13 +18,9 @@ public class GUI extends JPanel implements MouseListener, MouseMotionListener {
     // Image Icons
 
     private final ImageIcon gridSquareImg = new ImageIcon("Images/gridSquare.png");
-    private final ImageIcon gridSquareImg2 = new ImageIcon("Images/gridSquare2.png");
     private final ImageIcon wireToolImg = new ImageIcon("Images/copwire.png");
-    private final ImageIcon wireToolImg2 = new ImageIcon("Images/copwire2.png");
     private final ImageIcon andImage = new ImageIcon("Images/AndGate.png");
-    private final ImageIcon andImage2 = new ImageIcon("Images/AndGate2.png");
     private final ImageIcon notImage = new ImageIcon("Images/NotGate.png");
-    private final ImageIcon notImage2 = new ImageIcon("Images/NotGate2.png");
 
     //End of Image Icons
 
@@ -36,7 +32,7 @@ public class GUI extends JPanel implements MouseListener, MouseMotionListener {
         mouseY = 0;
         createGridButtons();
         createToolbar();
-        toolHeld = 0;
+        toolHeld = "";
         toolSelected = false;
     }
 
@@ -60,7 +56,7 @@ public class GUI extends JPanel implements MouseListener, MouseMotionListener {
             int col = 0;
             for(int y = 0; y < 1200; y+=48) {
                 Shape gridShape = new Rectangle(x, y, 48, 48);
-                Button button = new Button(gridShape, "gridSquare", gridSquareImg, gridSquareImg2, row, col);
+                Button button = new Button(gridShape, "gridSquare", gridSquareImg, row, col);
                 buttons.add(button);
                 col++;
             }
@@ -70,13 +66,13 @@ public class GUI extends JPanel implements MouseListener, MouseMotionListener {
 
     private void createToolbar() {
         Shape toolSquare1 = new Rectangle(0, 0, 120, 120);
-        Button wireButton = new Button(toolSquare1, "wire", wireToolImg, wireToolImg2);
+        Button wireButton = new Button(toolSquare1, "wire", wireToolImg);
         toolButtons.add(wireButton);
         Shape toolSquare2 = new Rectangle(120, 0, 120, 120);
-        Button notButton = new Button(toolSquare2, "not", notImage, notImage2);
+        Button notButton = new Button(toolSquare2, "not", notImage);
         toolButtons.add(notButton);
         Shape toolSquare3 = new Rectangle(0, 120, 120, 120);
-        Button andButton = new Button(toolSquare3, "and", andImage, andImage2);
+        Button andButton = new Button(toolSquare3, "and", andImage);
         toolButtons.add(andButton);
     }
 
@@ -90,31 +86,40 @@ public class GUI extends JPanel implements MouseListener, MouseMotionListener {
                         case "wire" -> {
                             if(!toolSelected) {
                                 toolSelected = true;
-                                toolHeld = 1;
+                                toolHeld = "wire";
                             }
-                            else if(toolHeld == 1){
+                            else if(toolHeld.equals("wire")){
                                 toolSelected = false;
-                                toolHeld = 0;
+                                toolHeld = "";
+                            }
+                            else {
+                                toolHeld = "wire";
                             }
                         }
                         case "not" -> {
                             if(!toolSelected) {
                                 toolSelected = true;
-                                toolHeld = 2;
+                                toolHeld = "not";
                             }
-                            else if(toolHeld == 2){
+                            else if(toolHeld.equals("not")){
                                 toolSelected = false;
-                                toolHeld = 0;
+                                toolHeld = "";
+                            }
+                            else {
+                                toolHeld = "not";
                             }
                         }
                         case "and" -> {
                             if(!toolSelected) {
                                 toolSelected = true;
-                                toolHeld = 3;
+                                toolHeld = "and";
                             }
-                            else if(toolHeld == 3){
+                            else if(toolHeld.equals("and")){
                                 toolSelected = false;
-                                toolHeld = 0;
+                                toolHeld = "";
+                            }
+                            else {
+                                toolHeld = "and";
                             }
                         }
                     }
@@ -125,18 +130,15 @@ public class GUI extends JPanel implements MouseListener, MouseMotionListener {
                     int tempRow = b.getRow();
                     int tempCol = b.getCol();
                     switch (toolHeld) {
-                        case 2 -> {
+                        case "not" -> {
                             NotBlock notBlock = new NotBlock(null);
-                            System.out.println(tempRow+" "+tempCol);
                             operators[tempRow][tempCol] = notBlock;
                             b.setRegularImage(notImage);
-                            b.setHighlightImage(notImage2);
                         }
-                        case 3 -> {
-                            NotBlock notBlock = new NotBlock(null);
-                            operators[tempRow][tempCol] = notBlock;
+                        case "and" -> {
+                            AndBlock andBlock = new AndBlock(null, null);
+                            operators[tempRow][tempCol] = andBlock;
                             b.setRegularImage(andImage);
-                            b.setHighlightImage(andImage2);
                         }
                     }
                 }
@@ -156,13 +158,29 @@ public class GUI extends JPanel implements MouseListener, MouseMotionListener {
                 b.unHighlight();
             }
         }
-        for(Button b: toolButtons) {
+        /*for(Button b: toolButtons) {
+            {
             if(b.getShape().contains(mouseX, mouseY)) {
                 b.highlight();
             }
             else {
                 b.unHighlight();
             }
+        }*/
+        for(Button b: toolButtons) {
+            if(toolHeld.equals(b.getTitle()) && !b.isToolbarColored()) {
+                b.toolbarHighlight();
+            }
+            else if(b.isToolbarColored() && !toolHeld.equals(b.getTitle())) {
+                b.resetToolbarColor();
+            }
+            if(b.getShape().contains(mouseX, mouseY)) {
+                b.highlight();
+            }
+            else {
+                b.unHighlight();
+            }
+
         }
         repaint();
     }
