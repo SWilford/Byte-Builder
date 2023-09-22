@@ -2,6 +2,11 @@ public abstract class Operator {
     protected Operator leadsTo; //block thing only has 1 output
     protected Operator previous1;
 
+    public Operator(Operator n){
+        previous1 = n;
+        if (previous1 != null)
+            previous1.setNext(this);
+    }
     public Operator getNext() {
         return leadsTo;
     }

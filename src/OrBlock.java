@@ -6,10 +6,7 @@ also output won't all be in one line since the method will essentially build as 
  */
 public class OrBlock extends Operator2I{
     public OrBlock(Operator n1, Operator n2){
-        previous1 = n1;
-        previous1.setNext(this);
-        previous2 = n2;
-        previous2.setNext(this);
+        super(n1, n2);
     }
     public boolean getOutput(){
         return (new NotBlock(new AndBlock(new NotBlock(previous1), new NotBlock(previous2)))).getOutput();

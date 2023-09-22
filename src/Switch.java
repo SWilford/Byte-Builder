@@ -2,8 +2,8 @@ public class Switch extends Operator{
     private boolean state; //holds a boolean on itself rather doing calculations from previous operators
 
     public Switch(){
-        state = false;    //defaults to false
-        previous1 = null; //no previous
+        super(null);
+        state = false; //switch default to false
     }
     public boolean getOutput(){
         return state;
