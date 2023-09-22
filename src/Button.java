@@ -63,6 +63,7 @@ public class Button {
     }
     public void resetToolbarColor() {
         baseColor = new Color(48, 48, 48);
+        color = baseColor;
         toolbarColored = false;
     }
 

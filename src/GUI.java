@@ -144,7 +144,6 @@ public class GUI extends JPanel implements MouseListener, MouseMotionListener {
                 }
             }
         }
-        repaint();
     }
 
     public void mouseMoved(MouseEvent e) {
@@ -158,15 +157,6 @@ public class GUI extends JPanel implements MouseListener, MouseMotionListener {
                 b.unHighlight();
             }
         }
-        /*for(Button b: toolButtons) {
-            {
-            if(b.getShape().contains(mouseX, mouseY)) {
-                b.highlight();
-            }
-            else {
-                b.unHighlight();
-            }
-        }*/
         for(Button b: toolButtons) {
             if(toolHeld.equals(b.getTitle()) && !b.isToolbarColored()) {
                 b.toolbarHighlight();
@@ -180,15 +170,16 @@ public class GUI extends JPanel implements MouseListener, MouseMotionListener {
             else {
                 b.unHighlight();
             }
-
         }
         repaint();
     }
 
     public void mousePressed(MouseEvent e) {
+        repaint();
     }
 
     public void mouseReleased(MouseEvent e) {
+        repaint();
     }
 
     public void mouseEntered(MouseEvent e) {
