@@ -144,11 +144,10 @@ public class GUI extends JPanel implements MouseListener, MouseMotionListener {
                 }
             }
         }
+        updateHighlighting();
     }
 
-    public void mouseMoved(MouseEvent e) {
-        mouseX = e.getX();
-        mouseY = e.getY();
+    private void updateHighlighting(){
         for(Button b: buttons) {
             if(b.getShape().contains(mouseX, mouseY)) {
                 b.highlight();
@@ -172,6 +171,11 @@ public class GUI extends JPanel implements MouseListener, MouseMotionListener {
             }
         }
         repaint();
+    }
+    public void mouseMoved(MouseEvent e) {
+        mouseX = e.getX();
+        mouseY = e.getY();
+        updateHighlighting();
     }
 
     public void mousePressed(MouseEvent e) {
