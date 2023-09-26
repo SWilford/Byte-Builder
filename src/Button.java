@@ -5,11 +5,12 @@ public class Button {
     private final Shape shape; //The bounding box for the button
     private final String title; //Title for the button
     private ImageIcon image; //Stores the base image
-    private Color color, baseColor, highlightColor;
+    private Color color, baseColor;
+    private final Color highlightColor; //Colors of the button
 
-    private boolean toolbarColored;
+    private boolean toolbarColored; //Has the button been colored with toolbarHighlightColor?
 
-    private Color toolbarHighlightColor = new Color(75, 75, 75);
+    private final Color toolbarHighlightColor = new Color(75, 75, 75); //Color for when tool is selected
 
     private int row, col; //Stores row and col of button in the 2d array of components
 
