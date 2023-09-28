@@ -18,6 +18,9 @@ public abstract class Operator {
     }
     public void setPrev1(Operator n){
         previous1 = n;
+        if (previous1 != null){
+            n.setNext(this);
+        }
     }
     public abstract boolean getOutput();
 }

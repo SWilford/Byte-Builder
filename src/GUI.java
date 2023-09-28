@@ -11,10 +11,11 @@ public class GUI extends JPanel implements MouseListener, MouseMotionListener {
     public String toolHeld = ""; //the title of the tool which is currently selected
     public boolean toolSelected; //If a tool has been selected or not (any tool)
     public ArrayList<Button> toolButtons = new ArrayList<>(); //Stores buttons in the toolbar
-
+    public ArrayList<Wire> wires = new ArrayList<>(); // stores wires to be drawn
     private static int mouseX; //X position of cursor
     private static int mouseY; //Y position of cursor
 
+    private static Point firstInput; //variable for first component clicked for 2, used for making wiring
     // Image Icons
 
     private final ImageIcon gridSquareImg = new ImageIcon("Images/gridSquare.png");
@@ -32,6 +33,7 @@ public class GUI extends JPanel implements MouseListener, MouseMotionListener {
         addMouseMotionListener(this);
         mouseX = 0; //Initializes mouse position to 0, 0
         mouseY = 0;
+        firstInput = null;
         createGridButtons();
         createToolbar();
         toolHeld = ""; //No tool held at start
@@ -44,6 +46,10 @@ public class GUI extends JPanel implements MouseListener, MouseMotionListener {
         }
         for(Button b:toolButtons) {
             b.drawButton(g);
+        }
+        g.setColor(Color.RED);
+        for (Wire w:wires){
+            g.drawLine(w.getX1(),w.getY1(),w.getX2(),w.getY2());
         }
     }
 
@@ -101,17 +107,29 @@ public class GUI extends JPanel implements MouseListener, MouseMotionListener {
 
     public void mouseClicked(MouseEvent e) { //What happens when the mouse is clicked
         int button = e.getButton();
-        if(button == MouseEvent.BUTTON1) {
-            for(Button b : toolButtons) { //When mouse is clicked on a tool button
-                if(b.getShape().contains(mouseX, mouseY)) {
+        if (button == MouseEvent.BUTTON1) {
+            for (Button b : toolButtons) { //When mouse is clicked on a tool button
+                if (b.getShape().contains(mouseX, mouseY)) {
                     toolButtonHelper(b.getTitle());
                 }
             }
-            for(Button b : buttons) { //When mouse is clicked on a grid button
-                if(b.getShape().contains(mouseX, mouseY)) {
-                    int tempRow = b.getRow();
-                    int tempCol = b.getCol();
+            for (Button b : buttons) { //When mouse is clicked on a grid button
+                if (b.getShape().contains(mouseX, mouseY)) {
+                    int tempCol = b.getRow();
+                    int tempRow = b.getCol();
+                    System.out.println((tempCol*48 + 36) + ", " + (tempRow*48 + 24));
                     switch (toolHeld) {
+                        case "wire" -> { //do wiring
+                            if (operators[tempRow][tempCol] != null) {
+                                if (firstInput == null) {
+                                    firstInput = new Point(tempCol, tempRow);
+                                } else {
+                                    operators[tempRow][tempCol].setPrev1(operators[(int) firstInput.getY()][(int) firstInput.getX()]); //set 2nd operator's previous to 1st operator
+                                    getWireCoords((int)firstInput.getX(), (int)firstInput.getY(), tempCol,tempRow);
+                                    firstInput = null; //reset
+                                }
+                            }
+                        }
                         case "not" -> { //creates not block
                             Operator notBlock = new NotBlock(null);
                             operators[tempRow][tempCol] = notBlock;
@@ -136,6 +154,37 @@ public class GUI extends JPanel implements MouseListener, MouseMotionListener {
             }
         }
         updateHighlighting();
+    }
+
+    private void getWireCoords(int c1, int r1, int c2, int r2){
+        Wire temp = new Wire(c1*48 + 36 + 240, r1*48 + 24, c2*48 + 12 + 240, r2*48 + 24);
+        System.out.println(temp.getX1() + ", " + temp.getY1() + ", " + temp.getX2() + ", " + temp.getY2());
+        wires.add(temp);
+    }
+    public class Wire{
+        private final int x1, y1, x2, y2;
+
+        public Wire(int a, int b, int c, int d){
+            x1 = a;
+            y1 = b;
+            x2 = c;
+            y2 = d;
+        }
+
+        public int getX1() {
+            return x1;
+        }
+        public int getY1() {
+            return y1;
+        }
+        public int getX2() {
+            return x2;
+        }
+        public int getY2() {
+            return y2;
+        }
+
+
     }
 
     private void updateHighlighting(){
@@ -163,6 +212,7 @@ public class GUI extends JPanel implements MouseListener, MouseMotionListener {
         }
         repaint();
     }
+
     public void mouseMoved(MouseEvent e) { //When mouse is moved, highlighting is updated
         mouseX = e.getX();
         mouseY = e.getY();
