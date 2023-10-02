@@ -167,8 +167,8 @@ public class GUI extends JPanel implements MouseListener, MouseMotionListener {
                             b.setRegularImage(onImage);
                         }
                         case "light" -> {
-                            Operator light = new Light(null);
-                            operators[tempRow][tempCol] = light;
+                            Operator lt = new Light(null);
+                            operators[tempRow][tempCol] = lt;
                             b.setRegularImage(lightOff);
                         }
                     }
@@ -217,16 +217,18 @@ public class GUI extends JPanel implements MouseListener, MouseMotionListener {
             else {
                 b.unHighlight();
             }
-            if(b.getTitle().equals("light")) {
-                int tempCol = b.getRow();
-                int tempRow = b.getCol();
-                if(operators[tempCol][tempRow].getOutput()) {
+            int tempCol = b.getRow();
+            int tempRow = b.getCol();
+            if(operators[tempRow][tempCol] instanceof Light) {
+                if(operators[tempRow][tempCol].getPrev1() != null && operators[tempRow][tempCol].getOutput()) {
                     b.setRegularImage(lightOn);
                 }
                 else {
                     b.setRegularImage(lightOff);
                 }
             }
+
+
         }
         for(Button b: toolButtons) {
             if(toolHeld.equals(b.getTitle()) && !b.isToolbarColored()) { //when a tool is selected primary color becomes the selection color
