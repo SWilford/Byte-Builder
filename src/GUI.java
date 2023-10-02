@@ -141,7 +141,12 @@ public class GUI extends JPanel implements MouseListener, MouseMotionListener {
                                 if (firstInput == null) {
                                     firstInput = new Point(tempCol, tempRow);
                                 } else {
-                                    operators[tempRow][tempCol].setPrev1(operators[(int) firstInput.getY()][(int) firstInput.getX()]); //set 2nd operator's previous to 1st operator
+                                    if(operators[tempRow][tempCol].getPrev1() != null && operators[tempRow][tempCol] instanceof Operator2I){
+                                        ((Operator2I) operators[tempRow][tempCol]).setPrev2(operators[(int) firstInput.getY()][(int) firstInput.getX()]);
+                                    }
+                                    else{
+                                        operators[tempRow][tempCol].setPrev1(operators[(int) firstInput.getY()][(int) firstInput.getX()]); //set 2nd operator's previous to 1st operator
+                                    }
                                     getWireCoords((int)firstInput.getX(), (int)firstInput.getY(), tempCol,tempRow);
                                     firstInput = null; //reset
                                 }
