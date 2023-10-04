@@ -150,7 +150,7 @@ public class GUI extends JPanel implements MouseListener, MouseMotionListener {
                                 if (firstInput == null) {
                                     firstInput = new Point(tempCol, tempRow);
                                 } else {
-                                    if(operators[tempRow][tempCol].getPrev1() != null && operators[tempRow][tempCol] instanceof Operator2I){
+                                    if(operators[tempRow][tempCol] instanceof Operator2I && operators[tempRow][tempCol].getPrev1() != null){
                                         ((Operator2I) operators[tempRow][tempCol]).setPrev2(operators[(int) firstInput.getY()][(int) firstInput.getX()]);
                                     }
                                     else{
@@ -172,6 +172,7 @@ public class GUI extends JPanel implements MouseListener, MouseMotionListener {
                             b.setRegularImage(andImage);
                         }
                         case "trash" -> { //deletes block
+                            deletePointersTo(operators[tempRow][tempCol]);
                             operators[tempRow][tempCol] = null;
                             b.setRegularImage(gridSquareImg);
                         }
@@ -191,6 +192,21 @@ public class GUI extends JPanel implements MouseListener, MouseMotionListener {
             }
         }
         updateHighlighting();
+    }
+
+    private void deletePointersTo(Operator n){
+        for (int r = 0; r < operators.length; r++){
+            for (int c = 0; c < operators[0].length; c++){
+                if (operators[r][c] != null) {
+                    if (operators[r][c].getPrev1() == n) {
+                        operators[r][c].setPrev1(null);
+                    }
+                    if (operators[r][c] instanceof Operator2I && ((Operator2I) operators[r][c]).getPrev2() == n) {
+                        operators[r][c].setPrev1(null);
+                    }
+                }
+            }
+        }
     }
 
     private void getWireCoords(int c1, int r1, int c2, int r2){
