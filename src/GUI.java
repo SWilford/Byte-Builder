@@ -57,8 +57,17 @@ public class GUI extends JPanel implements MouseListener, MouseMotionListener {
         g2.setColor(Color.RED);
         Stroke wireStroke = new BasicStroke(3);
         g2.setStroke(wireStroke);
+        ArrayList<Wire> wiresDelete = new ArrayList<>();
         for (Wire w:wires){
-            g2.drawLine(w.getX1(),w.getY1(),w.getX2(),w.getY2());
+            if(operators[(w.getY1()-24)/48][(w.getX1()-240-36)/48]==null||operators[(w.getY2()-24)/48][(w.getX2()-240-12)/48]==null) {
+                wiresDelete.add(w);
+            }
+            else {
+                g2.drawLine(w.getX1(), w.getY1(), w.getX2(), w.getY2());
+            }
+        }
+        for(Wire w:wiresDelete) {
+            wires.remove(w);
         }
         if(wireToCursor != null) {
             g2.drawLine(wireToCursor.getX1()*48+240+36, wireToCursor.getY1()*48+24, wireToCursor.getX2(), wireToCursor.getY2());
@@ -249,6 +258,12 @@ public class GUI extends JPanel implements MouseListener, MouseMotionListener {
                 b.unHighlight();
             }
         }
+        if(firstInput != null) {
+            wireToCursor = new Wire((int)firstInput.getX(), (int)firstInput.getY(), mouseX, mouseY);
+        }
+        else {
+            wireToCursor = null;
+        }
         repaint();
     }
 
@@ -256,14 +271,7 @@ public class GUI extends JPanel implements MouseListener, MouseMotionListener {
         mouseX = e.getX();
         mouseY = e.getY();
         updateHighlighting();
-        if(firstInput != null) {
-            wireToCursor = new Wire((int)firstInput.getX(), (int)firstInput.getY(), mouseX, mouseY);
-        }
-        else {
-            wireToCursor = null;
-        }
     }
-
 
 
     public void mousePressed(MouseEvent e) {
