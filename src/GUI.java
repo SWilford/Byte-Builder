@@ -29,6 +29,8 @@ public class GUI extends JPanel implements MouseListener, MouseMotionListener {
     private final ImageIcon onImage = new ImageIcon("Images/On.png");
     private final ImageIcon lightOn = new ImageIcon("Images/LightOn.png");
     private final ImageIcon lightOff = new ImageIcon("Images/LightOff.png");
+    private final ImageIcon switchOn = new ImageIcon("Images/LeverOn.png");
+    private final ImageIcon switchOff = new ImageIcon("Images/LeverOff.png");
 
     //End of Image Icons
 
@@ -112,6 +114,9 @@ public class GUI extends JPanel implements MouseListener, MouseMotionListener {
         Shape toolSquare6 = new Rectangle(120, 240, 120, 120);
         Button lightButton = new Button(toolSquare6, "light", lightOn);
         toolButtons.add(lightButton);
+        Shape toolSquare7 = new Rectangle(0, 360, 120, 120);
+        Button switchButton = new Button(toolSquare7, "switch", switchOff);
+        toolButtons.add(switchButton);
 
     }
 
@@ -145,6 +150,11 @@ public class GUI extends JPanel implements MouseListener, MouseMotionListener {
                     int tempCol = b.getRow();
                     int tempRow = b.getCol();
                     switch (toolHeld) {
+                        case "" -> {
+                            if(operators[tempRow][tempCol] instanceof Switch) {
+                                ((Switch) operators[tempRow][tempCol]).switchInput();
+                            }
+                        }
                         case "wire" -> { //do wiring
                             if (operators[tempRow][tempCol] != null) {
                                 if (firstInput == null) {
@@ -185,6 +195,11 @@ public class GUI extends JPanel implements MouseListener, MouseMotionListener {
                             Operator lt = new Light(null);
                             operators[tempRow][tempCol] = lt;
                             b.setRegularImage(lightOff);
+                        }
+                        case "switch" -> {
+                            Operator swi = new Switch();
+                            operators[tempRow][tempCol] = swi;
+                            b.setRegularImage(switchOff);
                         }
                     }
 
@@ -255,6 +270,14 @@ public class GUI extends JPanel implements MouseListener, MouseMotionListener {
                 }
                 else {
                     b.setRegularImage(lightOff);
+                }
+            }
+            if(operators[tempRow][tempCol] instanceof Switch) {
+                if(operators[tempRow][tempCol].getOutput()) {
+                    b.setRegularImage(switchOn);
+                }
+                else {
+                    b.setRegularImage(switchOff);
                 }
             }
 
