@@ -4,6 +4,9 @@ public class AndBlock extends Operator2I{
         super(n1, n2);
     }
     public boolean getOutput(){
+        if (previous1 == null || previous2 == null){
+            return false;
+        }
         return previous1.getOutput() && previous2.getOutput();
     }
 }
