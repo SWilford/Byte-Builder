@@ -1,4 +1,6 @@
 import javax.swing.*;
+import java.awt.event.KeyListener;
+import java.awt.event.KeyEvent;
 
 public class Driver {
 
@@ -11,5 +13,14 @@ public class Driver {
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setContentPane(screen);
         frame.setVisible(true);
+        frame.addKeyListener(new listen());		//Get input from the keyboard
+    }
+
+    public static class listen implements KeyListener{ //keyboard stuff
+        public void keyTyped(KeyEvent e){}
+        public void keyPressed(KeyEvent e){
+            screen.processUserInput(e.getKeyCode());
+        }
+        public void keyReleased(KeyEvent e){}
     }
 }
