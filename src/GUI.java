@@ -319,27 +319,13 @@ public class GUI extends JPanel implements MouseListener, MouseMotionListener {
                     firstInput = null;
                 }
             }
-            case KeyEvent.VK_1 -> {
-                toolButtonHelper("wire");
-            }
-            case KeyEvent.VK_2 -> {
-                toolButtonHelper("trash");
-            }
-            case KeyEvent.VK_3 -> {
-                toolButtonHelper("not");
-            }
-            case KeyEvent.VK_4 -> {
-                toolButtonHelper("and");
-            }
-            case KeyEvent.VK_5 -> {
-                toolButtonHelper("on");
-            }
-            case KeyEvent.VK_6 -> {
-                toolButtonHelper("light");
-            }
-            case KeyEvent.VK_7 -> {
-                toolButtonHelper("switch");
-            }
+            case KeyEvent.VK_1 -> toolButtonHelper("wire");
+            case KeyEvent.VK_2 -> toolButtonHelper("trash");
+            case KeyEvent.VK_3 -> toolButtonHelper("not");
+            case KeyEvent.VK_4 -> toolButtonHelper("and");
+            case KeyEvent.VK_5 -> toolButtonHelper("on");
+            case KeyEvent.VK_6 -> toolButtonHelper("light");
+            case KeyEvent.VK_7 -> toolButtonHelper("switch");
         }
         updateHighlighting();
     }
