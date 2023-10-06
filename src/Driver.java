@@ -21,6 +21,8 @@ public class Driver {
         public void keyPressed(KeyEvent e){
             screen.processUserInput(e.getKeyCode());
         }
-        public void keyReleased(KeyEvent e){}
+        public void keyReleased(KeyEvent e){
+
+        }
     }
 }
