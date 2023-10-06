@@ -10,6 +10,9 @@ public abstract class Operator2I extends Operator{
     public Operator getPrev2(){
         return previous2;
     }
+    public boolean isFull(){
+        return (previous1 != null && previous2 != null);
+    }
     public void setPrev2(Operator n){
         previous2 = n;
     }
