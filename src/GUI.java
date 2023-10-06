@@ -33,8 +33,12 @@ public class GUI extends JPanel implements MouseListener, MouseMotionListener {
     private final ImageIcon lightOff = new ImageIcon("Images/LightOff.png");
     private final ImageIcon switchOn = new ImageIcon("Images/LeverOn.png");
     private final ImageIcon switchOff = new ImageIcon("Images/LeverOff.png");
-    private final ImageIcon inImage = new ImageIcon("Images/Input.png");
-    private final ImageIcon outImage = new ImageIcon("Images/Output.png");
+    private final ImageIcon RedWire = new ImageIcon("Images/RedWire.png");
+    private final ImageIcon GreenWire = new ImageIcon("Images/GreenWire.png");
+    private final ImageIcon BlueWire = new ImageIcon("Images/BlueWire.png");
+    private final ImageIcon OrangeWire = new ImageIcon("Images/OrangeWire.png");
+    private final ImageIcon YellowWire = new ImageIcon("Images/YellowWire.png");
+    private final ImageIcon WhiteWire = new ImageIcon("Images/WhiteWire.png");
 
     //End of Image Icons
 
@@ -150,12 +154,7 @@ public class GUI extends JPanel implements MouseListener, MouseMotionListener {
         Shape toolSquare7 = new Rectangle(0, 360, 120, 120);
         Button switchButton = new Button(toolSquare7, "switch", switchOff);
         toolButtons.add(switchButton);
-        Shape toolSquare8 = new Rectangle(120, 360, 120, 120);
-        Button inButton = new Button(toolSquare8, "input", inImage);
-        toolButtons.add(inButton);
-        Shape toolSquare9 = new Rectangle(0, 480, 120, 120);
-        Button outButton = new Button(toolSquare9, "output", outImage);
-        toolButtons.add(outButton);
+
     }
 
     private void toolButtonHelper(String s) { //Helper method for when a tool is selected
@@ -170,7 +169,7 @@ public class GUI extends JPanel implements MouseListener, MouseMotionListener {
         else {
             toolHeld = s; //Switching from one tool to another
         }
-        if(!s.equals("wire") || toolHeld.equals("")) {
+        if(!s.equals("wire")) {
             firstInput = null;
         }
     }
@@ -198,12 +197,6 @@ public class GUI extends JPanel implements MouseListener, MouseMotionListener {
                                 if (firstInput == null) {
                                     firstInput = new Point(tempCol, tempRow);
                                 } else {
-                                    if (operators[tempRow][tempCol] instanceof OnBlock || operators[tempRow][tempCol] instanceof Switch){
-                                        break;
-                                    }
-                                    if (operators[tempRow][tempCol].isFull()){
-                                        break;
-                                    }
                                     if(operators[tempRow][tempCol] instanceof Operator2I && operators[tempRow][tempCol].getPrev1() != null){
                                         ((Operator2I) operators[tempRow][tempCol]).setPrev2(operators[(int) firstInput.getY()][(int) firstInput.getX()]);
                                     }
@@ -244,16 +237,6 @@ public class GUI extends JPanel implements MouseListener, MouseMotionListener {
                             Operator swi = new Switch();
                             operators[tempRow][tempCol] = swi;
                             b.setRegularImage(switchOff);
-                        }
-                        case "input" -> {
-                            Operator inBlock = new Input();
-                            operators[tempRow][tempCol] = inBlock;
-                            b.setRegularImage(inImage);
-                        }
-                        case "output" -> {
-                            Operator outBlock = new Output(null);
-                            operators[tempRow][tempCol] = outBlock;
-                            b.setRegularImage(outImage);
                         }
                     }
 
@@ -372,9 +355,8 @@ public class GUI extends JPanel implements MouseListener, MouseMotionListener {
                 b.unHighlight();
             }
         }
-
-        if(firstInput != null) { //draws wire to cursor
-            wireToCursor = new Wire((int)firstInput.getX(), (int)firstInput.getY(), mouseX, mouseY);
+        if(firstInput != null) {
+            wireToCursor = new Wire((int)firstInput.getX(), (int)firstInput.getY(), mouseX, mouseY, currentWireColor);
         }
         else {
             wireToCursor = null;
@@ -416,8 +398,6 @@ public class GUI extends JPanel implements MouseListener, MouseMotionListener {
             case KeyEvent.VK_5 -> toolButtonHelper("on");
             case KeyEvent.VK_6 -> toolButtonHelper("light");
             case KeyEvent.VK_7 -> toolButtonHelper("switch");
-            case KeyEvent.VK_8 -> toolButtonHelper("input");
-            case KeyEvent.VK_9 -> toolButtonHelper("output");
         }
         updateHighlighting();
     }
