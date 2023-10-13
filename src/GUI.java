@@ -87,6 +87,9 @@ public class GUI extends JPanel implements MouseListener, MouseMotionListener {
         if(wireToCursor != null) {
             g2.setColor(wireToCursor.getColor());
             g2.drawLine(wireToCursor.getX1()*48+240+36, wireToCursor.getY1()*48+24, wireToCursor.getX2(), wireToCursor.getY2());
+            g2.drawPolygon(
+                    new int[]{(wireToCursor.getX1()+wireToCursor.getX2())/2, }, new int[]{(wireToCursor.getY1()- wireToCursor.getY2())/2}, 3
+            );
         }
         if(toolHeld.equals("wire")) {
             for(Button b: wireColors) {
