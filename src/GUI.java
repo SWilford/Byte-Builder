@@ -12,6 +12,8 @@ public class GUI extends JPanel implements MouseListener, MouseMotionListener {
     public boolean toolSelected; //If a tool has been selected or not (any tool)
     public ArrayList<Button> toolButtons = new ArrayList<>(); //Stores buttons in the toolbar
     public ArrayList<Wire> wires = new ArrayList<>(); // stores wires to be drawn
+    public ArrayList<Button> wireColors = new ArrayList<>();
+    public String currentWireColor;
 
     public Wire wireToCursor; //The wire being generated when wire tool is selected
 
@@ -33,6 +35,12 @@ public class GUI extends JPanel implements MouseListener, MouseMotionListener {
     private final ImageIcon switchOff = new ImageIcon("Images/LeverOff.png");
     private final ImageIcon inImage = new ImageIcon("Images/Input.png");
     private final ImageIcon outImage = new ImageIcon("Images/Output.png");
+    private final ImageIcon RedWire = new ImageIcon("Images/RedWire.png");
+    private final ImageIcon GreenWire = new ImageIcon("Images/GreenWire.png");
+    private final ImageIcon BlueWire = new ImageIcon("Images/BlueWire.png");
+    private final ImageIcon OrangeWire = new ImageIcon("Images/OrangeWire.png");
+    private final ImageIcon YellowWire = new ImageIcon("Images/YellowWire.png");
+    private final ImageIcon WhiteWire = new ImageIcon("Images/WhiteWire.png");
 
     //End of Image Icons
 
@@ -48,6 +56,8 @@ public class GUI extends JPanel implements MouseListener, MouseMotionListener {
         toolHeld = ""; //No tool held at start
         toolSelected = false; //No tool selected at start
         wireToCursor = null;
+        createWireColors();
+        currentWireColor = "red";
     }
 
     public void display(Graphics g) { //Draws buttons
@@ -63,6 +73,7 @@ public class GUI extends JPanel implements MouseListener, MouseMotionListener {
         g2.setStroke(wireStroke);
         ArrayList<Wire> wiresDelete = new ArrayList<>();
         for (Wire w:wires){
+            g2.setColor(w.getColor());
             if(operators[(w.getY1()-24)/48][(w.getX1()-240-36)/48]==null||operators[(w.getY2()-24)/48][(w.getX2()-240-12)/48]==null) {
                 wiresDelete.add(w);
             }
@@ -74,7 +85,13 @@ public class GUI extends JPanel implements MouseListener, MouseMotionListener {
             wires.remove(w);
         }
         if(wireToCursor != null) {
+            g2.setColor(wireToCursor.getColor());
             g2.drawLine(wireToCursor.getX1()*48+240+36, wireToCursor.getY1()*48+24, wireToCursor.getX2(), wireToCursor.getY2());
+        }
+        if(toolHeld.equals("wire")) {
+            for(Button b: wireColors) {
+                b.drawButton(g);
+            }
         }
     }
 
@@ -95,6 +112,26 @@ public class GUI extends JPanel implements MouseListener, MouseMotionListener {
             }
             row++;
         }
+    }
+    private void createWireColors() { //Initializes buttons for selecting wire color
+        Shape s = new Rectangle(0, 1040, 80, 80);
+        Button b = new Button(s, "red", RedWire);
+        wireColors.add(b);
+        Shape s2 = new Rectangle(80, 1040, 80, 80);
+        Button b2 = new Button(s2, "green", GreenWire);
+        wireColors.add(b2);
+        Shape s3 = new Rectangle(160, 1040, 80, 80);
+        Button b3 = new Button(s3, "blue", BlueWire);
+        wireColors.add(b3);
+        Shape s4 = new Rectangle(0, 1120, 80, 80);
+        Button b4 = new Button(s4, "orange", OrangeWire);
+        wireColors.add(b4);
+        Shape s5 = new Rectangle(80, 1120, 80, 80);
+        Button b5 = new Button(s5, "yellow", YellowWire);
+        wireColors.add(b5);
+        Shape s6 = new Rectangle(160, 1120, 80, 80);
+        Button b6 = new Button(s6, "white", WhiteWire);
+        wireColors.add(b6);
     }
 
     private void createToolbar() { //Creates each toolbar button, should eventually become a method
@@ -225,7 +262,13 @@ public class GUI extends JPanel implements MouseListener, MouseMotionListener {
                             b.setRegularImage(outImage);
                         }
                     }
-
+                }
+            }
+            if(toolHeld.equals("wire")) {
+                for (Button b : wireColors) { //when wireColor button is clicked
+                    if(b.getShape().contains(mouseX, mouseY)) {
+                        currentWireColor = b.getTitle();
+                    }
                 }
             }
         }
@@ -248,17 +291,19 @@ public class GUI extends JPanel implements MouseListener, MouseMotionListener {
     }
 
     private void getWireCoords(int c1, int r1, int c2, int r2){
-        Wire temp = new Wire(c1*48 + 36 + 240, r1*48 + 24, c2*48 + 12 + 240, r2*48 + 24);
+        Wire temp = new Wire(c1*48 + 36 + 240, r1*48 + 24, c2*48 + 12 + 240, r2*48 + 24, currentWireColor);
         wires.add(temp);
     }
     public class Wire{
         private final int x1, y1, x2, y2;
+        private final String color;
 
-        public Wire(int a, int b, int c, int d){
+        public Wire(int a, int b, int c, int d, String cl){
             x1 = a;
             y1 = b;
             x2 = c;
             y2 = d;
+            color = cl;
         }
 
         public int getX1() {
@@ -273,7 +318,17 @@ public class GUI extends JPanel implements MouseListener, MouseMotionListener {
         public int getY2() {
             return y2;
         }
-
+        public Color getColor() {
+            switch (color) {
+                case "red" -> {return Color.RED;}
+                case "green" -> {return Color.GREEN;}
+                case "blue" -> {return Color.BLUE;}
+                case "orange" -> {return Color.ORANGE;}
+                case "yellow" -> {return Color.YELLOW;}
+                case "white" -> {return Color.WHITE;}
+            }
+            return null;
+        }
 
     }
 
@@ -321,12 +376,26 @@ public class GUI extends JPanel implements MouseListener, MouseMotionListener {
             }
         }
         if(firstInput != null) { //draws wire to cursor
-            wireToCursor = new Wire((int)firstInput.getX(), (int)firstInput.getY(), mouseX, mouseY);
+            wireToCursor = new Wire((int)firstInput.getX(), (int)firstInput.getY(), mouseX, mouseY, currentWireColor);
         }
         else {
             wireToCursor = null;
         }
         repaint();
+        for(Button b: wireColors) {
+            if(currentWireColor.equals(b.getTitle()) && !b.isToolbarColored()) {
+                b.toolbarHighlight();
+            }
+            else if(b.isToolbarColored() && !currentWireColor.equals(b.getTitle())) {
+                b.resetToolbarColor();
+            }
+            if(b.getShape().contains(mouseX, mouseY)) {
+                b.highlight();
+            }
+            else {
+                b.unHighlight();
+            }
+        }
     }
 
     public void mouseMoved(MouseEvent e) { //When mouse is moved, highlighting is updated
@@ -358,19 +427,10 @@ public class GUI extends JPanel implements MouseListener, MouseMotionListener {
     public void mousePressed(MouseEvent e) {
         repaint();
     }
-
     public void mouseReleased(MouseEvent e) {
         repaint();
     }
-
-    public void mouseEntered(MouseEvent e) {
-    }
-
-    public void mouseExited(MouseEvent e) {
-    }
-
-    public void mouseDragged(MouseEvent e) {
-    }
-
-
+    public void mouseEntered(MouseEvent e) {}
+    public void mouseExited(MouseEvent e) {}
+    public void mouseDragged(MouseEvent e) {}
 }
