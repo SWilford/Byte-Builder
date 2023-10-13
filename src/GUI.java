@@ -33,6 +33,8 @@ public class GUI extends JPanel implements MouseListener, MouseMotionListener {
     private final ImageIcon lightOff = new ImageIcon("Images/LightOff.png");
     private final ImageIcon switchOn = new ImageIcon("Images/LeverOn.png");
     private final ImageIcon switchOff = new ImageIcon("Images/LeverOff.png");
+    private final ImageIcon inImage = new ImageIcon("Images/Input.png");
+    private final ImageIcon outImage = new ImageIcon("Images/Output.png");
     private final ImageIcon RedWire = new ImageIcon("Images/RedWire.png");
     private final ImageIcon GreenWire = new ImageIcon("Images/GreenWire.png");
     private final ImageIcon BlueWire = new ImageIcon("Images/BlueWire.png");
@@ -66,6 +68,7 @@ public class GUI extends JPanel implements MouseListener, MouseMotionListener {
             b.drawButton(g);
         }
         Graphics2D g2 = (Graphics2D)g;
+        g2.setColor(Color.RED);
         Stroke wireStroke = new BasicStroke(3);
         g2.setStroke(wireStroke);
         ArrayList<Wire> wiresDelete = new ArrayList<>();
@@ -110,7 +113,6 @@ public class GUI extends JPanel implements MouseListener, MouseMotionListener {
             row++;
         }
     }
-
     private void createWireColors() { //Initializes buttons for selecting wire color
         Shape s = new Rectangle(0, 1040, 80, 80);
         Button b = new Button(s, "red", RedWire);
@@ -154,7 +156,12 @@ public class GUI extends JPanel implements MouseListener, MouseMotionListener {
         Shape toolSquare7 = new Rectangle(0, 360, 120, 120);
         Button switchButton = new Button(toolSquare7, "switch", switchOff);
         toolButtons.add(switchButton);
-
+        Shape toolSquare8 = new Rectangle(120, 360, 120, 120);
+        Button inButton = new Button(toolSquare8, "input", inImage);
+        toolButtons.add(inButton);
+        Shape toolSquare9 = new Rectangle(0, 480, 120, 120);
+        Button outButton = new Button(toolSquare9, "output", outImage);
+        toolButtons.add(outButton);
     }
 
     private void toolButtonHelper(String s) { //Helper method for when a tool is selected
@@ -169,7 +176,7 @@ public class GUI extends JPanel implements MouseListener, MouseMotionListener {
         else {
             toolHeld = s; //Switching from one tool to another
         }
-        if(!s.equals("wire")) {
+        if(!s.equals("wire") || toolHeld.equals("")) {
             firstInput = null;
         }
     }
@@ -197,6 +204,12 @@ public class GUI extends JPanel implements MouseListener, MouseMotionListener {
                                 if (firstInput == null) {
                                     firstInput = new Point(tempCol, tempRow);
                                 } else {
+                                    if (operators[tempRow][tempCol] instanceof OnBlock || operators[tempRow][tempCol] instanceof Switch){
+                                        break;
+                                    }
+                                    if (operators[tempRow][tempCol].isFull()){
+                                        break;
+                                    }
                                     if(operators[tempRow][tempCol] instanceof Operator2I && operators[tempRow][tempCol].getPrev1() != null){
                                         ((Operator2I) operators[tempRow][tempCol]).setPrev2(operators[(int) firstInput.getY()][(int) firstInput.getX()]);
                                     }
@@ -238,8 +251,17 @@ public class GUI extends JPanel implements MouseListener, MouseMotionListener {
                             operators[tempRow][tempCol] = swi;
                             b.setRegularImage(switchOff);
                         }
+                        case "input" -> {
+                            Operator inBlock = new Input();
+                            operators[tempRow][tempCol] = inBlock;
+                            b.setRegularImage(inImage);
+                        }
+                        case "output" -> {
+                            Operator outBlock = new Output(null);
+                            operators[tempRow][tempCol] = outBlock;
+                            b.setRegularImage(outImage);
+                        }
                     }
-
                 }
             }
             if(toolHeld.equals("wire")) {
@@ -274,7 +296,6 @@ public class GUI extends JPanel implements MouseListener, MouseMotionListener {
     }
     public class Wire{
         private final int x1, y1, x2, y2;
-
         private final String color;
 
         public Wire(int a, int b, int c, int d, String cl){
@@ -297,7 +318,6 @@ public class GUI extends JPanel implements MouseListener, MouseMotionListener {
         public int getY2() {
             return y2;
         }
-
         public Color getColor() {
             switch (color) {
                 case "red" -> {return Color.RED;}
@@ -355,7 +375,7 @@ public class GUI extends JPanel implements MouseListener, MouseMotionListener {
                 b.unHighlight();
             }
         }
-        if(firstInput != null) {
+        if(firstInput != null) { //draws wire to cursor
             wireToCursor = new Wire((int)firstInput.getX(), (int)firstInput.getY(), mouseX, mouseY, currentWireColor);
         }
         else {
@@ -398,6 +418,8 @@ public class GUI extends JPanel implements MouseListener, MouseMotionListener {
             case KeyEvent.VK_5 -> toolButtonHelper("on");
             case KeyEvent.VK_6 -> toolButtonHelper("light");
             case KeyEvent.VK_7 -> toolButtonHelper("switch");
+            case KeyEvent.VK_8 -> toolButtonHelper("input");
+            case KeyEvent.VK_9 -> toolButtonHelper("output");
         }
         updateHighlighting();
     }
@@ -405,19 +427,10 @@ public class GUI extends JPanel implements MouseListener, MouseMotionListener {
     public void mousePressed(MouseEvent e) {
         repaint();
     }
-
     public void mouseReleased(MouseEvent e) {
         repaint();
     }
-
-    public void mouseEntered(MouseEvent e) {
-    }
-
-    public void mouseExited(MouseEvent e) {
-    }
-
-    public void mouseDragged(MouseEvent e) {
-    }
-
-
+    public void mouseEntered(MouseEvent e) {}
+    public void mouseExited(MouseEvent e) {}
+    public void mouseDragged(MouseEvent e) {}
 }
