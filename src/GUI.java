@@ -70,6 +70,7 @@ public class GUI extends JPanel implements MouseListener, MouseMotionListener {
         Graphics2D g2 = (Graphics2D)g;
         g2.setColor(Color.RED);
         Stroke wireStroke = new BasicStroke(3);
+        g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
         g2.setStroke(wireStroke);
         ArrayList<Wire> wiresDelete = new ArrayList<>();
         for (Wire w:wires){
@@ -79,6 +80,7 @@ public class GUI extends JPanel implements MouseListener, MouseMotionListener {
             }
             else {
                 g2.drawLine(w.getX1(), w.getY1(), w.getX2(), w.getY2());
+                drawTriangle(g2,w.getX1(), w.getY1(), w.getX2(), w.getY2());
             }
         }
         for(Wire w:wiresDelete) {
@@ -87,15 +89,27 @@ public class GUI extends JPanel implements MouseListener, MouseMotionListener {
         if(wireToCursor != null) {
             g2.setColor(wireToCursor.getColor());
             g2.drawLine(wireToCursor.getX1()*48+240+36, wireToCursor.getY1()*48+24, wireToCursor.getX2(), wireToCursor.getY2());
-            g2.drawPolygon(
-                    new int[]{(wireToCursor.getX1()+wireToCursor.getX2())/2, }, new int[]{(wireToCursor.getY1()- wireToCursor.getY2())/2}, 3
-            );
+            drawTriangle(g2,wireToCursor.getX1()*48+240+36, wireToCursor.getY1()*48+24, wireToCursor.getX2(), wireToCursor.getY2());
         }
         if(toolHeld.equals("wire")) {
             for(Button b: wireColors) {
                 b.drawButton(g);
             }
         }
+    }
+
+    private void drawTriangle(Graphics2D g, int x1, int y1, int x2, int y2){
+        double angle = Math.atan2(y2-y1, x2-x1);
+        double xMid = (x1+x2)/2.0;
+        double yMid = (y1+y2)/2.0;
+        double x0 = xMid - 15 * Math.cos(angle);
+        double y0 = yMid - 15 * Math.sin(angle);
+        double angle2 = Math.PI / 2 - angle;
+        double xt = x0 - 10 * Math.cos(angle2);
+        double yt = y0 + 10 * Math.sin(angle2);
+        double xb = x0 + 10 * Math.cos(angle2);
+        double yb = y0 - 10 * Math.sin(angle2);
+        g.fillPolygon(new int[]{(int)xMid, (int)xt, (int)xb},new int[]{(int)yMid, (int)yt, (int)yb},3);
     }
 
     public void paintComponent(Graphics g) {
