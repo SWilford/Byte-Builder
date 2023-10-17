@@ -68,6 +68,29 @@ public class GUI extends JPanel implements MouseListener, MouseMotionListener {
             b.drawButton(g);
         }
         Graphics2D g2 = (Graphics2D)g;
+        Stroke borderStroke = new BasicStroke(1);
+        g2.setColor(Color.BLACK);
+        g2.setStroke(borderStroke);
+        for(int x = 240; x < 1440; x+=48) {
+            for(int y = 0; y < 1200; y += 48) {
+                g2.drawLine(x, y, x, 1200);
+                g2.drawLine(x, y, 1440, y);
+            }
+        }
+        if(toolHeld.equals("wire")) {
+            for(Button b: wireColors) {
+                b.drawButton(g);
+            }
+            g2.setStroke(borderStroke);
+            g2.setColor(Color.BLACK);
+            g2.drawLine(0, 1040, 240, 1040);
+            g2.drawLine(0, 1120, 240, 1120);
+            g2.drawLine(0, 1200, 240, 1200);
+            g2.drawLine(0, 1040, 0, 1200);
+            g2.drawLine(80, 1040, 80, 1200);
+            g2.drawLine(160, 1040, 160, 1200);
+            g2.drawLine(240, 1040, 240, 1200);
+        }
         g2.setColor(Color.RED);
         Stroke wireStroke = new BasicStroke(3);
         g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
@@ -90,11 +113,6 @@ public class GUI extends JPanel implements MouseListener, MouseMotionListener {
             g2.setColor(wireToCursor.getColor());
             g2.drawLine(wireToCursor.getX1()*48+240+36, wireToCursor.getY1()*48+24, wireToCursor.getX2(), wireToCursor.getY2());
             drawTriangle(g2,wireToCursor.getX1()*48+240+36, wireToCursor.getY1()*48+24, wireToCursor.getX2(), wireToCursor.getY2());
-        }
-        if(toolHeld.equals("wire")) {
-            for(Button b: wireColors) {
-                b.drawButton(g);
-            }
         }
     }
 
@@ -193,7 +211,7 @@ public class GUI extends JPanel implements MouseListener, MouseMotionListener {
         else {
             toolHeld = s; //Switching from one tool to another
         }
-        if(!s.equals("wire") || toolHeld.equals("")) {
+        if(!s.equals("wire") || toolHeld.isEmpty()) {
             firstInput = null;
         }
     }
@@ -293,14 +311,14 @@ public class GUI extends JPanel implements MouseListener, MouseMotionListener {
     }
 
     private void deletePointersTo(Operator n){
-        for (int r = 0; r < operators.length; r++){
-            for (int c = 0; c < operators[0].length; c++){
-                if (operators[r][c] != null) {
-                    if (operators[r][c].getPrev1() == n) {
-                        operators[r][c].setPrev1(null);
+        for (Operator[] operator : operators) {
+            for (int c = 0; c < operators[0].length; c++) {
+                if (operator[c] != null) {
+                    if (operator[c].getPrev1() == n) {
+                        operator[c].setPrev1(null);
                     }
-                    if (operators[r][c] instanceof Operator2I && ((Operator2I) operators[r][c]).getPrev2() == n) {
-                        operators[r][c].setPrev1(null);
+                    if (operator[c] instanceof Operator2I && ((Operator2I) operator[c]).getPrev2() == n) {
+                        operator[c].setPrev1(null);
                     }
                 }
             }
@@ -311,7 +329,7 @@ public class GUI extends JPanel implements MouseListener, MouseMotionListener {
         Wire temp = new Wire(c1*48 + 36 + 240, r1*48 + 24, c2*48 + 12 + 240, r2*48 + 24, currentWireColor);
         wires.add(temp);
     }
-    public class Wire{
+    public static class Wire{
         private final int x1, y1, x2, y2;
         private final String color;
 
