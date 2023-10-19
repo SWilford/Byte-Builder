@@ -97,12 +97,13 @@ public class GUI extends JPanel implements MouseListener, MouseMotionListener {
         g2.setStroke(wireStroke);
         ArrayList<Wire> wiresDelete = new ArrayList<>();
         for (Wire w:wires){
-            g2.setColor(w.getColor());
             if(operators[(w.getY1()-24)/48][(w.getX1()-240-36)/48]==null||operators[(w.getY2()-24)/48][(w.getX2()-240-12)/48]==null) {
                 wiresDelete.add(w);
             }
             else {
-                g2.drawLine(w.getX1(), w.getY1(), w.getX2(), w.getY2());
+                //g2.drawLine(w.getX1(), w.getY1(), w.getX2(), w.getY2());
+                w.drawWire(g2);
+                g2.setColor(w.getClr());
                 drawTriangle(g2,w.getX1(), w.getY1(), w.getX2(), w.getY2());
             }
         }
@@ -299,6 +300,16 @@ public class GUI extends JPanel implements MouseListener, MouseMotionListener {
                     }
                 }
             }
+            for(Wire w : wires) {
+                if(w.contains(mouseX, mouseY)) {
+                    if(w.isSelected()) {
+                        w.setSelected(false);
+                    }
+                    else {
+                        w.setSelected(true);
+                    }
+                }
+            }
             if(toolHeld.equals("wire")) {
                 for (Button b : wireColors) { //when wireColor button is clicked
                     if(b.getShape().contains(mouseX, mouseY)) {
@@ -328,43 +339,6 @@ public class GUI extends JPanel implements MouseListener, MouseMotionListener {
     private void getWireCoords(int c1, int r1, int c2, int r2){
         Wire temp = new Wire(c1*48 + 36 + 240, r1*48 + 24, c2*48 + 12 + 240, r2*48 + 24, currentWireColor);
         wires.add(temp);
-    }
-    public static class Wire{
-        private final int x1, y1, x2, y2;
-        private final String color;
-
-        public Wire(int a, int b, int c, int d, String cl){
-            x1 = a;
-            y1 = b;
-            x2 = c;
-            y2 = d;
-            color = cl;
-        }
-
-        public int getX1() {
-            return x1;
-        }
-        public int getY1() {
-            return y1;
-        }
-        public int getX2() {
-            return x2;
-        }
-        public int getY2() {
-            return y2;
-        }
-        public Color getColor() {
-            switch (color) {
-                case "red" -> {return Color.RED;}
-                case "green" -> {return Color.GREEN;}
-                case "blue" -> {return Color.BLUE;}
-                case "orange" -> {return Color.ORANGE;}
-                case "yellow" -> {return Color.YELLOW;}
-                case "white" -> {return Color.WHITE;}
-            }
-            return null;
-        }
-
     }
 
     private void updateHighlighting(){
@@ -415,6 +389,20 @@ public class GUI extends JPanel implements MouseListener, MouseMotionListener {
         }
         else {
             wireToCursor = null;
+        }
+        for(Wire w : wires) {
+            if(w.isSelected() && !w.isWireColored()) {
+                w.selectionHighlight();
+            }
+            else if(w.isWireColored() && !w.isSelected()) {
+                w.resetWireColor();
+            }
+            if(w.contains(mouseX, mouseY)) {
+                w.highlight();
+            }
+            else {
+                w.unHighlight();
+            }
         }
         repaint();
         for(Button b: wireColors) {
