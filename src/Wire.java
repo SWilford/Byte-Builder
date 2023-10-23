@@ -3,12 +3,12 @@ import java.awt.geom.Line2D;
 
 public class Wire {
     private final int x1, y1, x2, y2;
-    private final String color;
+    private String color;
 
     public boolean selected;
 
     private Color clr, baseColor;
-    private final Color highlightColor, highlightColor2;
+    private Color highlightColor, highlightColor2;
 
     public boolean wireColored;
 
@@ -35,17 +35,17 @@ public class Wire {
             hB = 0;
         }
         highlightColor = new Color(hR, hG, hB);
-        int hR2 = baseColor.getRed()+50;
-        int hG2 = baseColor.getGreen()+50;
-        int hB2 = baseColor.getBlue()+50;
-        if(hR2 > 255 ) {
-            hR2 = 255;
+        int hR2 = baseColor.getRed()-100;
+        int hG2 = baseColor.getGreen()-100;
+        int hB2 = baseColor.getBlue()-100;
+        if(hR2 < 0 ) {
+            hR2 = 0;
         }
-        if(hG2 > 255) {
-            hG2 = 255;
+        if(hG2 < 0) {
+            hG2 = 0;
         }
-        if(hB2 > 255) {
-            hB2 = 255;
+        if(hB2 < 0) {
+            hB2 = 0;
         }
         highlightColor2 = new Color(hR2, hG2, hB2);
 
@@ -75,6 +75,38 @@ public class Wire {
             case "white" -> {return Color.WHITE;}
         }
         return null;
+    }
+
+    public void setColor(String s) {
+        color = s;
+        baseColor = this.getColor();
+        clr = baseColor;
+        int hR = baseColor.getRed()-50;
+        int hG = baseColor.getGreen()-50;
+        int hB = baseColor.getBlue()-50;
+        if(hR < 0 ) {
+            hR = 0;
+        }
+        if(hG < 0) {
+            hG = 0;
+        }
+        if(hB < 0) {
+            hB = 0;
+        }
+        highlightColor = new Color(hR, hG, hB);
+        int hR2 = baseColor.getRed()-100;
+        int hG2 = baseColor.getGreen()-100;
+        int hB2 = baseColor.getBlue()-100;
+        if(hR2 < 0 ) {
+            hR2 = 0;
+        }
+        if(hG2 < 0) {
+            hG2 = 0;
+        }
+        if(hB2 < 0) {
+            hB2 = 0;
+        }
+        highlightColor2 = new Color(hR2, hG2, hB2);
     }
 
     public Color getClr() {
@@ -119,12 +151,11 @@ public class Wire {
         g2.setColor(clr);
         g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
         g2.setStroke(wireStroke);
-        g2.setColor(this.clr);
         g2.drawLine(x1, y1, x2, y2);
     }
 
     public boolean contains(int x, int y) {
-        return new Line2D.Double(x1,y1,x2,y2).ptLineDist(x, y)<=1.5;
+        return new Line2D.Double(x1,y1,x2,y2).ptLineDist(x, y)<=3;
     }
 
 
