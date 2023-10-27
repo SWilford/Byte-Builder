@@ -1,6 +1,7 @@
 import javax.swing.*;
 import java.awt.event.*;
 import java.io.IOException;
+import java.lang.reflect.Array;
 import java.util.*;
 import java.awt.*;
 
@@ -370,6 +371,10 @@ public class GUI extends JPanel implements MouseListener, MouseMotionListener {
         Wire temp = new Wire(c1*48 + 36 + 240, r1*48 + 24, c2*48 + 12 + 240, r2*48 + 24, currentWireColor);
         wires.add(temp);
     }
+    private void getWireCoords(int c1, int r1, int c2, int r2, String c){
+        Wire temp = new Wire(c1*48 + 36 + 240, r1*48 + 24, c2*48 + 12 + 240, r2*48 + 24, c);
+        wires.add(temp);
+    }
 
     private void updateHighlighting(){
         for(Button b: buttons) { //When mouse enters a grid button, it is highlighted
@@ -457,12 +462,23 @@ public class GUI extends JPanel implements MouseListener, MouseMotionListener {
 
     public void insert(Operator n){
         Button b = buttons.get(customIndex(n.getRow(), n.getCol()));
+        ArrayList<String> cl = FileManager.getColors();
         operators[b.getCol()][b.getRow()] = n;
         if (n.getPrev1() != null) {
-            getWireCoords(n.getPrev1().getRow(), n.getPrev1().getCol(), b.getRow(), b.getCol());
+            if (!cl.isEmpty()) {
+                getWireCoords(n.getPrev1().getRow(), n.getPrev1().getCol(), b.getRow(), b.getCol(), cl.remove(0));
+            }
+            else{
+                getWireCoords(n.getPrev1().getRow(), n.getPrev1().getCol(), b.getRow(), b.getCol());
+            }
         }
         if (n instanceof Operator2I && ((Operator2I) n).getPrev2() != null){
-            getWireCoords(((Operator2I) n).getPrev2().getRow(), ((Operator2I) n).getPrev2().getCol(), b.getRow(), b.getCol());
+            if (!cl.isEmpty()) {
+                getWireCoords(((Operator2I) n).getPrev2().getRow(), ((Operator2I) n).getPrev2().getCol(), b.getRow(), b.getCol(), cl.remove(0));
+            }
+            else{
+                getWireCoords(n.getPrev1().getRow(), n.getPrev1().getCol(), b.getRow(), b.getCol());
+            }
         }
         if(n instanceof NotBlock){
             b.setRegularImage(notImage);
@@ -509,7 +525,7 @@ public class GUI extends JPanel implements MouseListener, MouseMotionListener {
             case KeyEvent.VK_7 -> toolButtonHelper("switch");
             case KeyEvent.VK_8 -> toolButtonHelper("input");
             case KeyEvent.VK_9 -> toolButtonHelper("output");
-            case KeyEvent.VK_S -> {
+            case KeyEvent.VK_L -> {
                 try {
                     LinkedList<Operator> blocks = FileManager.readFile("Saves/orblock.txt");
                     for (Operator block : blocks) {

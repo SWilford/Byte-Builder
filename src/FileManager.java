@@ -6,6 +6,7 @@ public class FileManager {
      * @param fileName    String of name of file to find size of
      * @return    Returns size of fileName
      */
+    private static ArrayList<String> colors;
     public static int getFileSize(String fileName)throws IOException
     {
         Scanner input = new Scanner(new FileReader(fileName));
@@ -20,20 +21,25 @@ public class FileManager {
     }
 
     public static LinkedList<Operator> readFile(String fileName) throws IOException, ClassNotFoundException { //returns array of operators that have their connections
+        colors = new ArrayList<>();
         LinkedList<Operator> arr = new LinkedList<>();
         Scanner input = new Scanner(new FileReader(fileName));
         while (input.hasNextLine()){
             String[] thing = input.nextLine().split(",");
-            int col = Integer.parseInt(thing[2].trim());
+            int col = Integer.parseInt(thing[3].trim());
             System.out.println(col);
-            int row = Integer.parseInt(thing[1].trim());
+            int row = Integer.parseInt(thing[2].trim());
             Operator input1 = null;
             Operator input2 = null;
-            if (thing.length > 3){
-                input1 = arr.get(Integer.parseInt(thing[3].trim()));
-                if (thing.length > 4){
-                    input2 = arr.get(Integer.parseInt(thing[4].trim()));
+            if (thing.length > 4){
+                input1 = arr.get(Integer.parseInt(thing[4].trim()));
+                if (thing.length > 5){
+                    input2 = arr.get(Integer.parseInt(thing[5].trim()));
                 }
+            }
+            if (!thing[1].trim().equals("null")){
+                for (int i = 4; i < thing.length; i++)
+                    colors.add(thing[1].trim());
             }
             switch (thing[0].trim()){
                 case "NotBlock" ->  arr.add(new NotBlock(row, col, input1));
@@ -47,5 +53,9 @@ public class FileManager {
         }
         input.close();
         return arr;
+    }
+
+    public static ArrayList<String> getColors(){
+        return colors;
     }
 }
