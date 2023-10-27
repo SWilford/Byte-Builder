@@ -1,8 +1,8 @@
 public class Switch extends Operator{
     private boolean state; //holds a boolean on itself rather doing calculations from previous operators
 
-    public Switch(){
-        super(null);
+    public Switch(int r, int c){
+        super(r, c,null);
         state = false; //switch default to false
     }
     public boolean getOutput(){

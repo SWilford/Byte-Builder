@@ -1,5 +1,7 @@
 import javax.swing.*;
 import java.awt.event.*;
+import java.io.IOException;
+import java.lang.reflect.Array;
 import java.util.*;
 import java.awt.*;
 
@@ -12,6 +14,7 @@ public class GUI extends JPanel implements MouseListener, MouseMotionListener {
     public boolean toolSelected; //If a tool has been selected or not (any tool)
     public ArrayList<Button> toolButtons = new ArrayList<>(); //Stores buttons in the toolbar
     public ArrayList<Wire> wires = new ArrayList<>(); // stores wires to be drawn
+    private int toSel;
     public ArrayList<Button> wireColors = new ArrayList<>();
     public String currentWireColor;
 
@@ -45,6 +48,7 @@ public class GUI extends JPanel implements MouseListener, MouseMotionListener {
     //End of Image Icons
 
     public GUI() {
+        toSel = -1;
         this.setPreferredSize(new Dimension(1440, 1200)); //Manually sets size of JFrame
         addMouseListener(this); //Listeners
         addMouseMotionListener(this);
@@ -68,17 +72,50 @@ public class GUI extends JPanel implements MouseListener, MouseMotionListener {
             b.drawButton(g);
         }
         Graphics2D g2 = (Graphics2D)g;
+        Stroke borderStroke = new BasicStroke(1);
+        g2.setColor(Color.BLACK);
+        g2.setStroke(borderStroke);
+        for(int x = 240; x < 1440; x+=48) {
+            for(int y = 0; y < 1200; y += 48) {
+                g2.drawLine(x, y, x, 1200);
+                g2.drawLine(x, y, 1440, y);
+            }
+        }
+        boolean cBool = false;
+        for(Wire w : wires) {
+            if (w.isSelected()) {
+                cBool = true;
+                break;
+            }
+        }
+        if(toolHeld.equals("wire") || cBool) {
+            for(Button b: wireColors) {
+                b.drawButton(g);
+            }
+            g2.setStroke(borderStroke);
+            g2.setColor(Color.BLACK);
+            g2.drawLine(0, 1040, 240, 1040);
+            g2.drawLine(0, 1120, 240, 1120);
+            g2.drawLine(0, 1200, 240, 1200);
+            g2.drawLine(0, 1040, 0, 1200);
+            g2.drawLine(80, 1040, 80, 1200);
+            g2.drawLine(160, 1040, 160, 1200);
+            g2.drawLine(240, 1040, 240, 1200);
+        }
         g2.setColor(Color.RED);
         Stroke wireStroke = new BasicStroke(3);
+        g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
         g2.setStroke(wireStroke);
         ArrayList<Wire> wiresDelete = new ArrayList<>();
         for (Wire w:wires){
-            g2.setColor(w.getColor());
             if(operators[(w.getY1()-24)/48][(w.getX1()-240-36)/48]==null||operators[(w.getY2()-24)/48][(w.getX2()-240-12)/48]==null) {
                 wiresDelete.add(w);
             }
             else {
-                g2.drawLine(w.getX1(), w.getY1(), w.getX2(), w.getY2());
+                //g2.drawLine(w.getX1(), w.getY1(), w.getX2(), w.getY2());
+                w.drawWire(g2);
+                g2.setColor(w.getClr());
+                drawTriangle(g2,w.getX1(), w.getY1(), w.getX2(), w.getY2());
             }
         }
         for(Wire w:wiresDelete) {
@@ -87,12 +124,22 @@ public class GUI extends JPanel implements MouseListener, MouseMotionListener {
         if(wireToCursor != null) {
             g2.setColor(wireToCursor.getColor());
             g2.drawLine(wireToCursor.getX1()*48+240+36, wireToCursor.getY1()*48+24, wireToCursor.getX2(), wireToCursor.getY2());
+            drawTriangle(g2,wireToCursor.getX1()*48+240+36, wireToCursor.getY1()*48+24, wireToCursor.getX2(), wireToCursor.getY2());
         }
-        if(toolHeld.equals("wire")) {
-            for(Button b: wireColors) {
-                b.drawButton(g);
-            }
-        }
+    }
+
+    private void drawTriangle(Graphics2D g, int x1, int y1, int x2, int y2){
+        double angle = Math.atan2(y2-y1, x2-x1);
+        double xMid = (x1+x2)/2.0;
+        double yMid = (y1+y2)/2.0;
+        double x0 = xMid - 15 * Math.cos(angle);
+        double y0 = yMid - 15 * Math.sin(angle);
+        double angle2 = Math.PI / 2 - angle;
+        double xt = x0 - 10 * Math.cos(angle2);
+        double yt = y0 + 10 * Math.sin(angle2);
+        double xb = x0 + 10 * Math.cos(angle2);
+        double yb = y0 - 10 * Math.sin(angle2);
+        g.fillPolygon(new int[]{(int)xMid, (int)xt, (int)xb},new int[]{(int)yMid, (int)yt, (int)yb},3);
     }
 
     public void paintComponent(Graphics g) {
@@ -176,7 +223,7 @@ public class GUI extends JPanel implements MouseListener, MouseMotionListener {
         else {
             toolHeld = s; //Switching from one tool to another
         }
-        if(!s.equals("wire") || toolHeld.equals("")) {
+        if(!s.equals("wire") || toolHeld.isEmpty()) {
             firstInput = null;
         }
     }
@@ -222,12 +269,12 @@ public class GUI extends JPanel implements MouseListener, MouseMotionListener {
                             }
                         }
                         case "not" -> { //creates not block
-                            Operator notBlock = new NotBlock(null);
+                            Operator notBlock = new NotBlock(tempRow, tempCol, null);
                             operators[tempRow][tempCol] = notBlock;
                             b.setRegularImage(notImage);
                         }
                         case "and" -> { //creates and block
-                            Operator andBlock = new AndBlock(null, null);
+                            Operator andBlock = new AndBlock(tempRow, tempCol,null, null);
                             operators[tempRow][tempCol] = andBlock;
                             b.setRegularImage(andImage);
                         }
@@ -237,32 +284,53 @@ public class GUI extends JPanel implements MouseListener, MouseMotionListener {
                             b.setRegularImage(gridSquareImg);
                         }
                         case "on" -> {
-                            Operator onBlock = new OnBlock();
+                            Operator onBlock = new OnBlock(tempRow, tempCol);
                             operators[tempRow][tempCol] = onBlock;
                             b.setRegularImage(onImage);
                         }
                         case "light" -> {
-                            Operator lt = new Light(null);
+                            Operator lt = new Light(tempRow, tempCol,null);
                             operators[tempRow][tempCol] = lt;
                             b.setRegularImage(lightOff);
                         }
                         case "switch" -> {
-                            Operator swi = new Switch();
+                            Operator swi = new Switch(tempRow, tempCol);
                             operators[tempRow][tempCol] = swi;
                             b.setRegularImage(switchOff);
                         }
                         case "input" -> {
-                            Operator inBlock = new Input();
+                            Operator inBlock = new Input(tempRow, tempCol);
                             operators[tempRow][tempCol] = inBlock;
                             b.setRegularImage(inImage);
                         }
                         case "output" -> {
-                            Operator outBlock = new Output(null);
+                            Operator outBlock = new Output(tempRow, tempCol,null);
                             operators[tempRow][tempCol] = outBlock;
                             b.setRegularImage(outImage);
                         }
                     }
                 }
+            }
+            int toDel = -1;
+            for(Wire w : wires) {
+                if(w.contains(mouseX, mouseY)) {
+                    w.setSelected(!w.isSelected());
+                    toSel = wires.indexOf(w);
+                    if(w.isSelected() && toolHeld.equals("trash")) {
+                        int tempCol =((w.getX1()-240)/48);
+                        int tempRow =(w.getY1()/48);
+                        deletePointersTo(operators[tempRow][tempCol]);
+                        toDel = wires.indexOf(w);
+                    }
+                }
+            }
+            for(Wire w : wires) {
+                if(wires.indexOf(w) !=toSel) {
+                    w.setSelected(false);
+                }
+            }
+            if(toDel != -1) {
+                wires.remove(toDel);
             }
             if(toolHeld.equals("wire")) {
                 for (Button b : wireColors) { //when wireColor button is clicked
@@ -271,19 +339,28 @@ public class GUI extends JPanel implements MouseListener, MouseMotionListener {
                     }
                 }
             }
+            for(Wire w : wires) {
+                if(w.isSelected()) {
+                    for(Button b : wireColors) {
+                        if(b.getShape().contains(mouseX, mouseY)) {
+                            w.setColor(b.getTitle());
+                        }
+                    }
+                }
+            }
         }
         updateHighlighting();
     }
 
     private void deletePointersTo(Operator n){
-        for (int r = 0; r < operators.length; r++){
-            for (int c = 0; c < operators[0].length; c++){
-                if (operators[r][c] != null) {
-                    if (operators[r][c].getPrev1() == n) {
-                        operators[r][c].setPrev1(null);
+        for (Operator[] operator : operators) {
+            for (int c = 0; c < operators[0].length; c++) {
+                if (operator[c] != null) {
+                    if (operator[c].getPrev1() == n) {
+                        operator[c].setPrev1(null);
                     }
-                    if (operators[r][c] instanceof Operator2I && ((Operator2I) operators[r][c]).getPrev2() == n) {
-                        operators[r][c].setPrev1(null);
+                    if (operator[c] instanceof Operator2I && ((Operator2I) operator[c]).getPrev2() == n) {
+                        operator[c].setPrev1(null);
                     }
                 }
             }
@@ -294,42 +371,9 @@ public class GUI extends JPanel implements MouseListener, MouseMotionListener {
         Wire temp = new Wire(c1*48 + 36 + 240, r1*48 + 24, c2*48 + 12 + 240, r2*48 + 24, currentWireColor);
         wires.add(temp);
     }
-    public class Wire{
-        private final int x1, y1, x2, y2;
-        private final String color;
-
-        public Wire(int a, int b, int c, int d, String cl){
-            x1 = a;
-            y1 = b;
-            x2 = c;
-            y2 = d;
-            color = cl;
-        }
-
-        public int getX1() {
-            return x1;
-        }
-        public int getY1() {
-            return y1;
-        }
-        public int getX2() {
-            return x2;
-        }
-        public int getY2() {
-            return y2;
-        }
-        public Color getColor() {
-            switch (color) {
-                case "red" -> {return Color.RED;}
-                case "green" -> {return Color.GREEN;}
-                case "blue" -> {return Color.BLUE;}
-                case "orange" -> {return Color.ORANGE;}
-                case "yellow" -> {return Color.YELLOW;}
-                case "white" -> {return Color.WHITE;}
-            }
-            return null;
-        }
-
+    private void getWireCoords(int c1, int r1, int c2, int r2, String c){
+        Wire temp = new Wire(c1*48 + 36 + 240, r1*48 + 24, c2*48 + 12 + 240, r2*48 + 24, c);
+        wires.add(temp);
     }
 
     private void updateHighlighting(){
@@ -381,6 +425,20 @@ public class GUI extends JPanel implements MouseListener, MouseMotionListener {
         else {
             wireToCursor = null;
         }
+        for(Wire w : wires) {
+            if(w.isSelected() && !w.isWireColored()) {
+                w.selectionHighlight();
+            }
+            else if(w.isWireColored() && !w.isSelected()) {
+                w.resetWireColor();
+            }
+            if(w.contains(mouseX, mouseY)) {
+                w.highlight();
+            }
+            else {
+                w.unHighlight();
+            }
+        }
         repaint();
         for(Button b: wireColors) {
             if(currentWireColor.equals(b.getTitle()) && !b.isToolbarColored()) {
@@ -395,6 +453,53 @@ public class GUI extends JPanel implements MouseListener, MouseMotionListener {
             else {
                 b.unHighlight();
             }
+        }
+    }
+
+    public int customIndex(int row, int col){
+        return (row*25)+col;
+    }
+
+    public void insert(Operator n){
+        Button b = buttons.get(customIndex(n.getRow(), n.getCol()));
+        ArrayList<String> cl = FileManager.getColors();
+        operators[b.getCol()][b.getRow()] = n;
+        if (n.getPrev1() != null) {
+            if (!cl.isEmpty()) {
+                getWireCoords(n.getPrev1().getRow(), n.getPrev1().getCol(), b.getRow(), b.getCol(), cl.remove(0));
+            }
+            else{
+                getWireCoords(n.getPrev1().getRow(), n.getPrev1().getCol(), b.getRow(), b.getCol());
+            }
+        }
+        if (n instanceof Operator2I && ((Operator2I) n).getPrev2() != null){
+            if (!cl.isEmpty()) {
+                getWireCoords(((Operator2I) n).getPrev2().getRow(), ((Operator2I) n).getPrev2().getCol(), b.getRow(), b.getCol(), cl.remove(0));
+            }
+            else{
+                getWireCoords(n.getPrev1().getRow(), n.getPrev1().getCol(), b.getRow(), b.getCol());
+            }
+        }
+        if(n instanceof NotBlock){
+            b.setRegularImage(notImage);
+        }
+        if (n instanceof AndBlock){
+           b.setRegularImage(andImage);
+        }
+        if (n instanceof OnBlock){
+            b.setRegularImage(onImage);
+        }
+        if (n instanceof Light){
+            b.setRegularImage(lightOff);
+        }
+        if (n instanceof Switch){
+            b.setRegularImage(switchOff);
+        }
+        if (n instanceof Input){
+            b.setRegularImage(inImage);
+        }
+        if (n instanceof Output){
+            b.setRegularImage(outImage);
         }
     }
 
@@ -420,6 +525,16 @@ public class GUI extends JPanel implements MouseListener, MouseMotionListener {
             case KeyEvent.VK_7 -> toolButtonHelper("switch");
             case KeyEvent.VK_8 -> toolButtonHelper("input");
             case KeyEvent.VK_9 -> toolButtonHelper("output");
+            case KeyEvent.VK_L -> {
+                try {
+                    LinkedList<Operator> blocks = FileManager.readFile("Saves/orblock.txt");
+                    for (Operator block : blocks) {
+                        insert(block);
+                    }
+                } catch (IOException | ClassNotFoundException e) {
+                    throw new RuntimeException(e);
+                }
+            }
         }
         updateHighlighting();
     }

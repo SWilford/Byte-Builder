@@ -1,7 +1,7 @@
 public class Light extends Operator{
 
-    public Light(Operator n){
-        super(n);
+    public Light(int r, int c, Operator n){
+        super(r, c, n);
     }
     public boolean getOutput() {
         if (previous1 == null){
