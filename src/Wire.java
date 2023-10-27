@@ -155,8 +155,6 @@ public class Wire {
     }
 
     public boolean contains(int x, int y) {
-        return new Line2D.Double(x1,y1,x2,y2).ptLineDist(x, y)<=3;
+        return Line2D.ptSegDist(x1, y1, x2, y2, x, y) > 3;
     }
-
-
 }

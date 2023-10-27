@@ -1,6 +1,6 @@
 public class Input extends Operator{ //end of custom block segment
-    public Input(){
-        super(null);
+    public Input(int r, int c){
+        super(r, c, null);
     }
     public boolean getOutput(){
         if (previous1 == null){

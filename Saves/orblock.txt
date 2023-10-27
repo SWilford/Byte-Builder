@@ -1,0 +1,7 @@
+Switch,      0, 0
+Switch,      0, 1
+NotBlock,   1, 0,   0,
+NotBlock,   1, 1,   1,
+AndBlock,   2, 0,   2, 3,
+NotBlock,   3, 0,   4,
+Light,     4, 0,   5,

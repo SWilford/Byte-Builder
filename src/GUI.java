@@ -1,5 +1,6 @@
 import javax.swing.*;
 import java.awt.event.*;
+import java.io.IOException;
 import java.util.*;
 import java.awt.*;
 
@@ -267,12 +268,12 @@ public class GUI extends JPanel implements MouseListener, MouseMotionListener {
                             }
                         }
                         case "not" -> { //creates not block
-                            Operator notBlock = new NotBlock(null);
+                            Operator notBlock = new NotBlock(tempRow, tempCol, null);
                             operators[tempRow][tempCol] = notBlock;
                             b.setRegularImage(notImage);
                         }
                         case "and" -> { //creates and block
-                            Operator andBlock = new AndBlock(null, null);
+                            Operator andBlock = new AndBlock(tempRow, tempCol,null, null);
                             operators[tempRow][tempCol] = andBlock;
                             b.setRegularImage(andImage);
                         }
@@ -282,27 +283,27 @@ public class GUI extends JPanel implements MouseListener, MouseMotionListener {
                             b.setRegularImage(gridSquareImg);
                         }
                         case "on" -> {
-                            Operator onBlock = new OnBlock();
+                            Operator onBlock = new OnBlock(tempRow, tempCol);
                             operators[tempRow][tempCol] = onBlock;
                             b.setRegularImage(onImage);
                         }
                         case "light" -> {
-                            Operator lt = new Light(null);
+                            Operator lt = new Light(tempRow, tempCol,null);
                             operators[tempRow][tempCol] = lt;
                             b.setRegularImage(lightOff);
                         }
                         case "switch" -> {
-                            Operator swi = new Switch();
+                            Operator swi = new Switch(tempRow, tempCol);
                             operators[tempRow][tempCol] = swi;
                             b.setRegularImage(switchOff);
                         }
                         case "input" -> {
-                            Operator inBlock = new Input();
+                            Operator inBlock = new Input(tempRow, tempCol);
                             operators[tempRow][tempCol] = inBlock;
                             b.setRegularImage(inImage);
                         }
                         case "output" -> {
-                            Operator outBlock = new Output(null);
+                            Operator outBlock = new Output(tempRow, tempCol,null);
                             operators[tempRow][tempCol] = outBlock;
                             b.setRegularImage(outImage);
                         }
@@ -450,6 +451,42 @@ public class GUI extends JPanel implements MouseListener, MouseMotionListener {
         }
     }
 
+    public int customIndex(int row, int col){
+        return (row*25)+col;
+    }
+
+    public void insert(Operator n){
+        Button b = buttons.get(customIndex(n.getRow(), n.getCol()));
+        operators[b.getCol()][b.getRow()] = n;
+        if (n.getPrev1() != null) {
+            getWireCoords(n.getPrev1().getRow(), n.getPrev1().getCol(), b.getRow(), b.getCol());
+        }
+        if (n instanceof Operator2I && ((Operator2I) n).getPrev2() != null){
+            getWireCoords(((Operator2I) n).getPrev2().getRow(), ((Operator2I) n).getPrev2().getCol(), b.getRow(), b.getCol());
+        }
+        if(n instanceof NotBlock){
+            b.setRegularImage(notImage);
+        }
+        if (n instanceof AndBlock){
+           b.setRegularImage(andImage);
+        }
+        if (n instanceof OnBlock){
+            b.setRegularImage(onImage);
+        }
+        if (n instanceof Light){
+            b.setRegularImage(lightOff);
+        }
+        if (n instanceof Switch){
+            b.setRegularImage(switchOff);
+        }
+        if (n instanceof Input){
+            b.setRegularImage(inImage);
+        }
+        if (n instanceof Output){
+            b.setRegularImage(outImage);
+        }
+    }
+
     public void mouseMoved(MouseEvent e) { //When mouse is moved, highlighting is updated
         mouseX = e.getX();
         mouseY = e.getY();
@@ -472,6 +509,16 @@ public class GUI extends JPanel implements MouseListener, MouseMotionListener {
             case KeyEvent.VK_7 -> toolButtonHelper("switch");
             case KeyEvent.VK_8 -> toolButtonHelper("input");
             case KeyEvent.VK_9 -> toolButtonHelper("output");
+            case KeyEvent.VK_S -> {
+                try {
+                    LinkedList<Operator> blocks = FileManager.readFile("Saves/orblock.txt");
+                    for (Operator block : blocks) {
+                        insert(block);
+                    }
+                } catch (IOException | ClassNotFoundException e) {
+                    throw new RuntimeException(e);
+                }
+            }
         }
         updateHighlighting();
     }
