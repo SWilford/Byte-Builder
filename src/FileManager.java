@@ -23,18 +23,17 @@ public class FileManager {
     public static LinkedList<Operator> readFile(String fileName) throws IOException, ClassNotFoundException { //returns array of operators that have their connections
         colors = new ArrayList<>();
         LinkedList<Operator> arr = new LinkedList<>();
+        LinkedList<Integer> inputs = new LinkedList<>();
         Scanner input = new Scanner(new FileReader(fileName));
         while (input.hasNextLine()){
             String[] thing = input.nextLine().split(",");
             int col = Integer.parseInt(thing[3].trim());
             System.out.println(col);
             int row = Integer.parseInt(thing[2].trim());
-            Operator input1 = null;
-            Operator input2 = null;
             if (thing.length > 4){
-                input1 = arr.get(Integer.parseInt(thing[4].trim()));
+                inputs.add(Integer.parseInt(thing[4].trim()));
                 if (thing.length > 5){
-                    input2 = arr.get(Integer.parseInt(thing[5].trim()));
+                    inputs.add(Integer.parseInt(thing[5].trim()));
                 }
             }
             if (!thing[1].trim().equals("null")){
@@ -42,13 +41,21 @@ public class FileManager {
                     colors.add(thing[1].trim());
             }
             switch (thing[0].trim()){
-                case "NotBlock" ->  arr.add(new NotBlock(row, col, input1));
-                case "AndBlock" ->  arr.add(new AndBlock(row, col, input1, input2));
+                case "NotBlock" ->  arr.add(new NotBlock(row, col, null));
+                case "AndBlock" ->  arr.add(new AndBlock(row, col, null, null));
                 case "OnBlock" ->   arr.add(new OnBlock(row, col));
-                case "Light" ->     arr.add(new Light(row, col, input1));
+                case "Light" ->     arr.add(new Light(row, col, null));
                 case "Switch" ->    arr.add(new Switch(row, col));
                 case "Input" ->     arr.add(new Input(row, col));
-                case "Output" ->    arr.add(new Output(row, col, input1));
+                case "Output" ->    arr.add(new Output(row, col, null));
+            }
+        }
+        for (Operator operator : arr) {
+            if (!(operator instanceof Input || operator instanceof Switch)) {
+                operator.setPrev1(arr.get(inputs.removeFirst()));
+                if (operator instanceof Operator2I) {
+                    ((Operator2I) operator).setPrev2(arr.get(inputs.removeFirst()));
+                }
             }
         }
         input.close();
