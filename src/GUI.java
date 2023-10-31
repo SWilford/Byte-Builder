@@ -1,6 +1,6 @@
 import javax.swing.*;
 import java.awt.event.*;
-import java.io.IOException;
+import java.io.*;
 import java.lang.reflect.Array;
 import java.util.*;
 import java.awt.*;
@@ -503,6 +503,18 @@ public class GUI extends JPanel implements MouseListener, MouseMotionListener {
         }
     }
 
+    public LinkedList<Operator> toList(){
+        LinkedList<Operator> arr = new LinkedList<>();
+        for (Operator[] op: operators){
+            for (Operator n: op){
+                if (n != null){
+                    arr.add(n);
+                }
+            }
+        }
+        return arr;
+    }
+
     public void mouseMoved(MouseEvent e) { //When mouse is moved, highlighting is updated
         mouseX = e.getX();
         mouseY = e.getY();
@@ -527,12 +539,25 @@ public class GUI extends JPanel implements MouseListener, MouseMotionListener {
             case KeyEvent.VK_9 -> toolButtonHelper("output");
             case KeyEvent.VK_L -> {
                 try {
-                    LinkedList<Operator> blocks = FileManager.readFile("Saves/orblock.txt");
+                    LinkedList<Operator> blocks = FileManager.readFile("Saves/untitled.txt");
                     for (Operator block : blocks) {
                         insert(block);
                     }
                 } catch (IOException | ClassNotFoundException e) {
                     throw new RuntimeException(e);
+                }
+            }
+            case KeyEvent.VK_S -> {
+                File n = new File("Saves/untitled.txt");
+                if (!n.exists()){
+                    try {
+                        n.createNewFile();
+                    } catch (IOException ignored) {}
+                }
+                if (n.exists()){
+                    try {
+                        FileManager.writeToFile(toList(), "Saves/untitled.txt");
+                    } catch (IOException ignored) {}
                 }
             }
         }

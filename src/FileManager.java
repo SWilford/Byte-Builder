@@ -54,7 +54,7 @@ public class FileManager {
             if (!(operator instanceof Input || operator instanceof Switch)) {
                 operator.setPrev1(arr.get(inputs.removeFirst()));
                 if (operator instanceof Operator2I) {
-                    ((Operator2I) operator).setPrev2(arr.get(inputs.removeFirst()));
+                    ((Operator2I) operator).setPrev2(arr.get(inputs.removeFirst())); //under the assumption that every block with inputs has those inputs filled*
                 }
             }
         }
@@ -64,5 +64,30 @@ public class FileManager {
 
     public static ArrayList<String> getColors(){
         return colors;
+    }
+
+
+    public static void writeToFile(LinkedList<Operator> array, String filename) throws IOException
+    {
+        System.setOut(new PrintStream(new FileOutputStream(filename)));
+        for(int i = 0; i < array.size(); i++){
+            Operator op = array.get(i);
+            String n = op.getClass().getName();
+            String color = "red"; //temporary
+            int col = op.getCol();
+            int row = op.getRow();
+
+            String line = n + ", " + color + ", " + col + ", " + row;
+
+            if (op.getPrev1() != null){
+                line += ", " + array.indexOf(op.getPrev1());
+            }
+            if (op instanceof Operator2I && ((Operator2I) op).getPrev2() != null){
+                line += ", " + array.indexOf(((Operator2I) op).getPrev2());
+            }
+            System.out.println(line);
+        }
+        System.out.flush();
+        System.setOut(new PrintStream(new FileOutputStream(FileDescriptor.out)));
     }
 }
