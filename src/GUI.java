@@ -236,6 +236,9 @@ public class GUI extends JPanel implements MouseListener, MouseMotionListener {
                     toolButtonHelper(b.getTitle());
                 }
             }
+
+
+
             for (Button b : buttons) { //When mouse is clicked on a grid button
                 if (b.getShape().contains(mouseX, mouseY)) {
                     int tempCol = b.getRow();
@@ -311,7 +314,7 @@ public class GUI extends JPanel implements MouseListener, MouseMotionListener {
                     }
                 }
             }
-            int toDel = -1;
+            /*int toDel = -1;
             for(Wire w : wires) {
                 if(w.contains(mouseX, mouseY)) {
                     w.setSelected(!w.isSelected());
@@ -331,7 +334,7 @@ public class GUI extends JPanel implements MouseListener, MouseMotionListener {
             }
             if(toDel != -1) {
                 wires.remove(toDel);
-            }
+            }*/
             if(toolHeld.equals("wire")) {
                 for (Button b : wireColors) { //when wireColor button is clicked
                     if(b.getShape().contains(mouseX, mouseY)) {
@@ -339,7 +342,7 @@ public class GUI extends JPanel implements MouseListener, MouseMotionListener {
                     }
                 }
             }
-            for(Wire w : wires) {
+            for(Wire w : wires) { //if a wire is selected you can change the color of that wire
                 if(w.isSelected()) {
                     for(Button b : wireColors) {
                         if(b.getShape().contains(mouseX, mouseY)) {
