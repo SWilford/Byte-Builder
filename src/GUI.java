@@ -1,5 +1,6 @@
 import javax.swing.*;
 import java.awt.event.*;
+import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Array;
 import java.util.*;
@@ -254,17 +255,19 @@ public class GUI extends JPanel implements MouseListener, MouseMotionListener {
                                 if (firstInput == null) {
                                     firstInput = new Point(tempCol, tempRow);
                                 } else {
-                                    if (operators[tempRow][tempCol] instanceof OnBlock || operators[tempRow][tempCol] instanceof Switch){
+                                    if (operators[tempRow][tempCol] instanceof OnBlock || operators[tempRow][tempCol] instanceof Switch){ //do nothing since start
                                         break;
                                     }
-                                    if (operators[tempRow][tempCol].isFull()){
+                                    if (operators[tempRow][tempCol].isFull()){//do nothing
                                         break;
                                     }
-                                    if(operators[tempRow][tempCol] instanceof Operator2I && operators[tempRow][tempCol].getPrev1() != null){
+                                    if(operators[tempRow][tempCol] instanceof Operator2I && operators[tempRow][tempCol].getPrev1() != null){ //if it has two inputs and the first is taken
                                         ((Operator2I) operators[tempRow][tempCol]).setPrev2(operators[(int) firstInput.getY()][(int) firstInput.getX()]);
+                                        ((Operator2I)operators[tempRow][tempCol]).setColor2(currentWireColor);
                                     }
-                                    else{
+                                    else{ //Go to the second slot
                                         operators[tempRow][tempCol].setPrev1(operators[(int) firstInput.getY()][(int) firstInput.getX()]); //set 2nd operator's previous to 1st operator
+                                        operators[tempRow][tempCol].setColor(currentWireColor);
                                     }
                                     getWireCoords((int)firstInput.getX(), (int)firstInput.getY(), tempCol,tempRow);
                                     firstInput = null; //reset
@@ -314,27 +317,6 @@ public class GUI extends JPanel implements MouseListener, MouseMotionListener {
                     }
                 }
             }
-            /*int toDel = -1;
-            for(Wire w : wires) {
-                if(w.contains(mouseX, mouseY)) {
-                    w.setSelected(!w.isSelected());
-                    toSel = wires.indexOf(w);
-                    if(w.isSelected() && toolHeld.equals("trash")) {
-                        int tempCol =((w.getX1()-240)/48);
-                        int tempRow =(w.getY1()/48);
-                        deletePointersTo(operators[tempRow][tempCol]);
-                        toDel = wires.indexOf(w);
-                    }
-                }
-            }
-            for(Wire w : wires) {
-                if(wires.indexOf(w) !=toSel) {
-                    w.setSelected(false);
-                }
-            }
-            if(toDel != -1) {
-                wires.remove(toDel);
-            }*/
             if(toolHeld.equals("wire")) {
                 for (Button b : wireColors) { //when wireColor button is clicked
                     if(b.getShape().contains(mouseX, mouseY)) {
@@ -428,7 +410,7 @@ public class GUI extends JPanel implements MouseListener, MouseMotionListener {
         else {
             wireToCursor = null;
         }
-        for(Wire w : wires) {
+        /*for(Wire w : wires) { old wire highlighting
             if(w.isSelected() && !w.isWireColored()) {
                 w.selectionHighlight();
             }
@@ -441,7 +423,7 @@ public class GUI extends JPanel implements MouseListener, MouseMotionListener {
             else {
                 w.unHighlight();
             }
-        }
+        }*/
         repaint();
         for(Button b: wireColors) {
             if(currentWireColor.equals(b.getTitle()) && !b.isToolbarColored()) {
@@ -465,23 +447,12 @@ public class GUI extends JPanel implements MouseListener, MouseMotionListener {
 
     public void insert(Operator n){
         Button b = buttons.get(customIndex(n.getRow(), n.getCol()));
-        ArrayList<String> cl = FileManager.getColors();
         operators[b.getCol()][b.getRow()] = n;
         if (n.getPrev1() != null) {
-            if (!cl.isEmpty()) {
-                getWireCoords(n.getPrev1().getRow(), n.getPrev1().getCol(), b.getRow(), b.getCol(), cl.remove(0));
-            }
-            else{
-                getWireCoords(n.getPrev1().getRow(), n.getPrev1().getCol(), b.getRow(), b.getCol());
-            }
+                getWireCoords(n.getPrev1().getRow(), n.getPrev1().getCol(), b.getRow(), b.getCol(), n.getColor());
         }
         if (n instanceof Operator2I && ((Operator2I) n).getPrev2() != null){
-            if (!cl.isEmpty()) {
-                getWireCoords(((Operator2I) n).getPrev2().getRow(), ((Operator2I) n).getPrev2().getCol(), b.getRow(), b.getCol(), cl.remove(0));
-            }
-            else{
-                getWireCoords(n.getPrev1().getRow(), n.getPrev1().getCol(), b.getRow(), b.getCol());
-            }
+                getWireCoords(((Operator2I) n).getPrev2().getRow(), ((Operator2I) n).getPrev2().getCol(), b.getRow(), b.getCol(), ((Operator2I) n).getColor2());
         }
         if(n instanceof NotBlock){
             b.setRegularImage(notImage);
@@ -530,7 +501,7 @@ public class GUI extends JPanel implements MouseListener, MouseMotionListener {
             case KeyEvent.VK_9 -> toolButtonHelper("output");
             case KeyEvent.VK_L -> {
                 try {
-                    LinkedList<Operator> blocks = FileManager.readFile("Saves/orblock.txt");
+                    LinkedList<Operator> blocks = FileManager.readFile("Saves/untitled.txt");
                     for (Operator block : blocks) {
                         insert(block);
                     }
@@ -538,9 +509,36 @@ public class GUI extends JPanel implements MouseListener, MouseMotionListener {
                     throw new RuntimeException(e);
                 }
             }
+            case KeyEvent.VK_S -> {
+                File n = new File("Saves/untitled.txt");
+                if (!n.exists()){
+                    try {
+                        n.createNewFile();
+                    } catch (IOException ignored) {}
+                }
+                if (n.exists()){
+                    try {
+                        FileManager.writeToFile(toList(), "Saves/untitled.txt");
+                    } catch (IOException ignored) {}
+                }
+            }
+
         }
         updateHighlighting();
     }
+
+    public LinkedList<Operator> toList(){
+        LinkedList<Operator> arr = new LinkedList<>();
+        for (Operator[] op: operators){
+            for (Operator n: op){
+                if (n != null){
+                    arr.add(n);
+                }
+            }
+        }
+        return arr;
+    }
+
 
     public void mousePressed(MouseEvent e) {
         repaint();

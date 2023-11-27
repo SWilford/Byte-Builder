@@ -6,7 +6,6 @@ public class FileManager {
      * @param fileName    String of name of file to find size of
      * @return    Returns size of fileName
      */
-    private static ArrayList<String> colors;
     public static int getFileSize(String fileName)throws IOException
     {
         Scanner input = new Scanner(new FileReader(fileName));
@@ -21,33 +20,32 @@ public class FileManager {
     }
 
     public static LinkedList<Operator> readFile(String fileName) throws IOException, ClassNotFoundException { //returns array of operators that have their connections
-        colors = new ArrayList<>();
         LinkedList<Operator> arr = new LinkedList<>();
         LinkedList<Integer> inputs = new LinkedList<>();
         Scanner input = new Scanner(new FileReader(fileName));
         while (input.hasNextLine()){
             String[] thing = input.nextLine().split(",");
-            int col = Integer.parseInt(thing[3].trim());
+            int col = Integer.parseInt(thing[4].trim());
             System.out.println(col);
-            int row = Integer.parseInt(thing[2].trim());
-            if (thing.length > 4){
-                inputs.add(Integer.parseInt(thing[4].trim()));
-                if (thing.length > 5){
-                    inputs.add(Integer.parseInt(thing[5].trim()));
+            int row = Integer.parseInt(thing[3].trim());
+            if (thing.length > 5){
+                inputs.add(Integer.parseInt(thing[5].trim()));
+                if (thing.length > 6){
+                    inputs.add(Integer.parseInt(thing[6].trim()));
                 }
             }
-            if (!thing[1].trim().equals("null")){
-                for (int i = 4; i < thing.length; i++)
-                    colors.add(thing[1].trim());
-            }
+
+            String color = thing[1].trim();
+            String color2 = thing[2].trim();
+
             switch (thing[0].trim()){
-                case "NotBlock" ->  arr.add(new NotBlock(row, col, null));
-                case "AndBlock" ->  arr.add(new AndBlock(row, col, null, null));
+                case "NotBlock" ->  arr.add(new NotBlock(row, col, null, color));
+                case "AndBlock" ->  arr.add(new AndBlock(row, col, null, null, color, color2));
                 case "OnBlock" ->   arr.add(new OnBlock(row, col));
-                case "Light" ->     arr.add(new Light(row, col, null));
+                case "Light" ->     arr.add(new Light(row, col, null, color));
                 case "Switch" ->    arr.add(new Switch(row, col));
-                case "Input" ->     arr.add(new Input(row, col));
-                case "Output" ->    arr.add(new Output(row, col, null));
+                case "Input" ->     arr.add(new Input(row, col, color));
+                case "Output" ->    arr.add(new Output(row, col, null, color));
             }
         }
         for (Operator operator : arr) {
@@ -62,7 +60,34 @@ public class FileManager {
         return arr;
     }
 
-    public static ArrayList<String> getColors(){
-        return colors;
+    public static void writeToFile(LinkedList<Operator> array, String filename) throws IOException
+    {
+        System.setOut(new PrintStream(new FileOutputStream(filename)));
+        for(int i = 0; i < array.size(); i++){
+            Operator op = array.get(i);
+            String n = op.getClass().getName();
+            String color = op.getColor();
+            String color2 = "null";
+            if (op instanceof Operator2I) {
+                color2 = ((Operator2I) op).getColor2();
+            }
+            int col = op.getCol();
+            int row = op.getRow();
+
+
+            String line = n + ", " + color + ", " + color2 + ", " + col + ", " + row;
+
+
+            if (op.getPrev1() != null){
+                line += ", " + array.indexOf(op.getPrev1());
+            }
+            if (op instanceof Operator2I && ((Operator2I) op).getPrev2() != null){
+                line += ", " + array.indexOf(((Operator2I) op).getPrev2());
+            }
+            System.out.println(line);
+        }
+        System.out.flush();
+        System.setOut(new PrintStream(new FileOutputStream(FileDescriptor.out)));
     }
+
 }
