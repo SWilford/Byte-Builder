@@ -255,17 +255,23 @@ public class GUI extends JPanel implements MouseListener, MouseMotionListener {
                                 if (firstInput == null) {
                                     firstInput = new Point(tempCol, tempRow);
                                 } else {
-                                    if (operators[tempRow][tempCol] instanceof OnBlock || operators[tempRow][tempCol] instanceof Switch){ //do nothing since start
+                                    if (operators[tempRow][tempCol] instanceof OnBlock || operators[tempRow][tempCol] instanceof Switch || operators[tempRow][tempCol].isFull()){ //do nothing since start
                                         break;
                                     }
-                                    if (operators[tempRow][tempCol].isFull()){//do nothing
-                                        break;
+                                    if (operators[tempRow][tempCol] instanceof Custom){ //custom block
+                                        Operator temp = ((Custom) operators[tempRow][tempCol]).getFirstEmpty();
+                                        if (temp != null){
+                                            temp.setPrev1(operators[(int) firstInput.getY()][(int) firstInput.getX()]);
+                                        }
+                                        else{
+                                            break;
+                                        }
                                     }
-                                    if(operators[tempRow][tempCol] instanceof Operator2I && operators[tempRow][tempCol].getPrev1() != null){ //if it has two inputs and the first is taken
-                                        ((Operator2I) operators[tempRow][tempCol]).setPrev2(operators[(int) firstInput.getY()][(int) firstInput.getX()]);
+                                    else if(operators[tempRow][tempCol] instanceof Operator2I && operators[tempRow][tempCol].getPrev1() != null){ //if it has two inputs and the first is taken
+                                        ((Operator2I) operators[tempRow][tempCol]).setPrev2(operators[(int) firstInput.getY()][(int) firstInput.getX()]); //Go to the second slot
                                         ((Operator2I)operators[tempRow][tempCol]).setColor2(currentWireColor);
                                     }
-                                    else{ //Go to the second slot
+                                    else{ //first slot
                                         operators[tempRow][tempCol].setPrev1(operators[(int) firstInput.getY()][(int) firstInput.getX()]); //set 2nd operator's previous to 1st operator
                                         operators[tempRow][tempCol].setColor(currentWireColor);
                                     }
@@ -475,6 +481,9 @@ public class GUI extends JPanel implements MouseListener, MouseMotionListener {
         if (n instanceof Output){
             b.setRegularImage(outImage);
         }
+        if (n instanceof Custom){
+            b.setRegularImage(GreenWire);
+        }
     }
 
     public void mouseMoved(MouseEvent e) { //When mouse is moved, highlighting is updated
@@ -520,6 +529,13 @@ public class GUI extends JPanel implements MouseListener, MouseMotionListener {
                     try {
                         FileManager.writeToFile(toList(), "Saves/untitled.txt");
                     } catch (IOException ignored) {}
+                }
+            }
+            case KeyEvent.VK_T -> {
+                try {
+                    insert(new Custom(5, 5, FileManager.readFile("Saves/untitled.txt")));
+                } catch (IOException | ClassNotFoundException e) {
+                    throw new RuntimeException(e);
                 }
             }
 

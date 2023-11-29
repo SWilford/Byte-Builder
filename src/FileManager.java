@@ -65,7 +65,7 @@ public class FileManager {
         System.setOut(new PrintStream(new FileOutputStream(filename)));
         for(int i = 0; i < array.size(); i++){
             Operator op = array.get(i);
-            String n = op.getClass().getName();
+            String n = op.getClass().getName(); //do with custom blocks
             String color = op.getColor();
             String color2 = "null";
             if (op instanceof Operator2I) {

@@ -1,4 +1,1 @@
-AndBlock, white, orange, 15, 8, 1, 2
-Switch, red, null, 8, 10
-Switch, red, null, 9, 13
-Light, blue, null, 20, 15, 0
+Custom(filename), red, null, 5, 5
