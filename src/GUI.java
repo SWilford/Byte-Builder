@@ -237,9 +237,6 @@ public class GUI extends JPanel implements MouseListener, MouseMotionListener {
                     toolButtonHelper(b.getTitle());
                 }
             }
-
-
-
             for (Button b : buttons) { //When mouse is clicked on a grid button
                 if (b.getShape().contains(mouseX, mouseY)) {
                     int tempCol = b.getRow();
@@ -454,6 +451,18 @@ public class GUI extends JPanel implements MouseListener, MouseMotionListener {
     public void insert(Operator n){
         Button b = buttons.get(customIndex(n.getRow(), n.getCol()));
         operators[b.getCol()][b.getRow()] = n;
+        /*
+        if (operators[tempRow][tempCol] instanceof Custom){ //custom block
+            Operator temp = ((Custom) operators[tempRow][tempCol]).getFirstEmpty();
+            if (temp != null){
+                temp.setPrev1(operators[(int) firstInput.getY()][(int) firstInput.getX()]);
+            }
+            else{
+                break;
+            }
+        }
+        */
+         */
         if (n.getPrev1() != null) {
                 getWireCoords(n.getPrev1().getRow(), n.getPrev1().getCol(), b.getRow(), b.getCol(), n.getColor());
         }
@@ -533,7 +542,7 @@ public class GUI extends JPanel implements MouseListener, MouseMotionListener {
             }
             case KeyEvent.VK_T -> {
                 try {
-                    insert(new Custom(5, 5, FileManager.readFile("Saves/untitled.txt")));
+                    insert(new Custom(5, 5, FileManager.readFile("Saves/orblock.txt"), "orblock"));
                 } catch (IOException | ClassNotFoundException e) {
                     throw new RuntimeException(e);
                 }

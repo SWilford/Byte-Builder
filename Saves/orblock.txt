@@ -1,7 +1,7 @@
-Switch, null, null,     0, 0
-Switch, null, null,      0, 1
-NotBlock, green, null,   1, 0,   0,
-NotBlock, blue, null,   1, 1,   1,
-AndBlock, orange, white,   2, 0,   2, 3,
-NotBlock, yellow, null,  3, 0,   4,
-Light, white, null,    4, 0,   5,
+Input, red, null, 0, 0
+NotBlock, red, null, 1, 0, 0
+AndBlock, red, red, 2, 0, 1, 5
+Output, red, null, 3, 0, 6
+Input, red, null, 0, 1
+NotBlock, red, null, 1, 1, 4
+NotBlock, red, null, 2, 1, 2

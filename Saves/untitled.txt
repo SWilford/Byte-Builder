@@ -1,1 +1,8 @@
-Custom(filename), red, null, 5, 5
+Switch, red, null, 0, 4
+AndBlock, red, red, 2, 4, 0, 2
+NotBlock, red, null, 2, 5, 5
+Custom(orblock), red, null, 5, 5
+Light, red, null, 8, 5, 3
+Switch, red, null, 0, 6
+NotBlock, red, null, 2, 6, 0
+AndBlock, red, red, 2, 7, 5, 6

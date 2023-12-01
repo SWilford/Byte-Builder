@@ -21,39 +21,48 @@ public class FileManager {
 
     public static LinkedList<Operator> readFile(String fileName) throws IOException, ClassNotFoundException { //returns array of operators that have their connections
         LinkedList<Operator> arr = new LinkedList<>();
-        LinkedList<Integer> inputs = new LinkedList<>();
+        LinkedList<String[]> inputs = new LinkedList<>();
         Scanner input = new Scanner(new FileReader(fileName));
         while (input.hasNextLine()){
             String[] thing = input.nextLine().split(",");
             int col = Integer.parseInt(thing[4].trim());
-            System.out.println(col);
             int row = Integer.parseInt(thing[3].trim());
-            if (thing.length > 5){
-                inputs.add(Integer.parseInt(thing[5].trim()));
-                if (thing.length > 6){
-                    inputs.add(Integer.parseInt(thing[6].trim()));
-                }
+            if (thing.length > 6){
+                inputs.add(new String[]{thing[5].trim(), thing[6].trim()});
+            } else if (thing.length == 6) {
+                inputs.add(new String[]{thing[5].trim(), null});
+            }
+            else{
+                inputs.add(new String[]{null, null});
+
             }
 
             String color = thing[1].trim();
             String color2 = thing[2].trim();
 
-            switch (thing[0].trim()){
-                case "NotBlock" ->  arr.add(new NotBlock(row, col, null, color));
-                case "AndBlock" ->  arr.add(new AndBlock(row, col, null, null, color, color2));
-                case "OnBlock" ->   arr.add(new OnBlock(row, col));
-                case "Light" ->     arr.add(new Light(row, col, null, color));
-                case "Switch" ->    arr.add(new Switch(row, col));
-                case "Input" ->     arr.add(new Input(row, col, color));
-                case "Output" ->    arr.add(new Output(row, col, null, color));
+            if (thing[0].contains("(")){
+                String name = thing[0].substring(thing[0].indexOf("(")+1,thing[0].indexOf(")"));
+                arr.add(new Custom(row, col, FileManager.readFile("Saves/" + name + ".txt"), name));
+            }
+            else {
+                switch (thing[0].trim()) {
+                    case "NotBlock" ->  arr.add(new NotBlock(row, col, null, color));
+                    case "AndBlock" ->  arr.add(new AndBlock(row, col, null, null, color, color2));
+                    case "OnBlock" ->   arr.add(new OnBlock(row, col));
+                    case "Light" ->     arr.add(new Light(row, col, null, color));
+                    case "Switch" ->    arr.add(new Switch(row, col));
+                    case "Input" ->     arr.add(new Input(row, col, color));
+                    case "Output" ->    arr.add(new Output(row, col, null, color));
+                }
             }
         }
         for (Operator operator : arr) {
-            if (!(operator instanceof Input || operator instanceof Switch)) {
-                operator.setPrev1(arr.get(inputs.removeFirst()));
-                if (operator instanceof Operator2I) {
-                    ((Operator2I) operator).setPrev2(arr.get(inputs.removeFirst()));
-                }
+            String[] temp = inputs.removeFirst();
+            if (temp[0] != null){
+                operator.setPrev1(arr.get(Integer.parseInt(temp[0])));
+            }
+            if (temp[1] != null) {
+                ((Operator2I) operator).setPrev2(arr.get(Integer.parseInt(temp[1])));
             }
         }
         input.close();
@@ -65,7 +74,10 @@ public class FileManager {
         System.setOut(new PrintStream(new FileOutputStream(filename)));
         for(int i = 0; i < array.size(); i++){
             Operator op = array.get(i);
-            String n = op.getClass().getName(); //do with custom blocks
+            String n = op.getClass().getName();
+            if (n.equals("Custom")){
+                n += "("+ ((Custom)op).getName()+")";
+            }
             String color = op.getColor();
             String color2 = "null";
             if (op instanceof Operator2I) {

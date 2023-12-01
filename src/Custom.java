@@ -3,8 +3,9 @@ import java.util.*;
 public class Custom extends Operator{
     private final ArrayList<Operator> inputs; //different way to handle inputs
     private final LinkedList<Operator> block;
+    private final String name;
 
-    public Custom(int r, int c, LinkedList<Operator> s) {
+    public Custom(int r, int c, LinkedList<Operator> s, String n) {
         super(r, c, null);
         inputs = new ArrayList<Operator>();
         block = s;
@@ -13,6 +14,7 @@ public class Custom extends Operator{
                 inputs.add(b);
             }
         }
+        name = n;
     }
     public int numInputs(){
         return inputs.size();
@@ -35,5 +37,9 @@ public class Custom extends Operator{
             }
         }
         return false;
+    }
+
+    public String getName() {
+        return name;
     }
 }
