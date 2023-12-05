@@ -1,0 +1,8 @@
+AndBlock, red, red, 2, 3, 1, 2
+Input, red, null, 0, 4
+NotBlock, red, null, 2, 4, 3
+Input, red, null, 0, 5
+NotBlock, red, null, 2, 5, 1
+Custom(orblock), red, null, 5, 5, 0, 7
+Output, red, null, 8, 5, 5
+AndBlock, red, red, 2, 6, 3, 4

@@ -40,7 +40,7 @@ public class FileManager {
             String color = thing[1].trim();
             String color2 = thing[2].trim();
 
-            if (thing[0].contains("(")){
+            if (thing[0].contains("(")){ //custom
                 String name = thing[0].substring(thing[0].indexOf("(")+1,thing[0].indexOf(")"));
                 arr.add(new Custom(row, col, FileManager.readFile("Saves/" + name + ".txt"), name));
             }
@@ -56,13 +56,23 @@ public class FileManager {
                 }
             }
         }
-        for (Operator operator : arr) {
+        for (Operator operator : arr) { //buffer for inputs
             String[] temp = inputs.removeFirst();
-            if (temp[0] != null){
-                operator.setPrev1(arr.get(Integer.parseInt(temp[0])));
+            if (operator instanceof Custom){
+                if (temp[0] != null) {
+                    ((Custom) operator).getFirstEmpty().setPrev1(arr.get(Integer.parseInt(temp[0])));
+                }
+                if (temp[1] != null) {
+                    ((Custom) operator).getFirstEmpty().setPrev1(arr.get(Integer.parseInt(temp[1])));
+                }
             }
-            if (temp[1] != null) {
-                ((Operator2I) operator).setPrev2(arr.get(Integer.parseInt(temp[1])));
+            else {
+                if (temp[0] != null) {
+                    operator.setPrev1(arr.get(Integer.parseInt(temp[0])));
+                }
+                if (temp[1] != null) {
+                    ((Operator2I) operator).setPrev2(arr.get(Integer.parseInt(temp[1])));
+                }
             }
         }
         input.close();
@@ -89,12 +99,18 @@ public class FileManager {
 
             String line = n + ", " + color + ", " + color2 + ", " + col + ", " + row;
 
-
-            if (op.getPrev1() != null){
-                line += ", " + array.indexOf(op.getPrev1());
+            if (op instanceof Custom){
+                for (Operator temp : ((Custom) op).getInputs()){
+                    line += ", " + array.indexOf(temp.getPrev1());
+                }
             }
-            if (op instanceof Operator2I && ((Operator2I) op).getPrev2() != null){
-                line += ", " + array.indexOf(((Operator2I) op).getPrev2());
+            else {
+                if (op.getPrev1() != null) {
+                    line += ", " + array.indexOf(op.getPrev1());
+                }
+                if (op instanceof Operator2I && ((Operator2I) op).getPrev2() != null) {
+                    line += ", " + array.indexOf(((Operator2I) op).getPrev2());
+                }
             }
             System.out.println(line);
         }

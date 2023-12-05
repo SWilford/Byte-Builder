@@ -341,14 +341,23 @@ public class GUI extends JPanel implements MouseListener, MouseMotionListener {
     }
 
     private void deletePointersTo(Operator n){
-        for (Operator[] operator : operators) {
+        for (int r = 0; r < operators.length; r++) {
             for (int c = 0; c < operators[0].length; c++) {
-                if (operator[c] != null) {
-                    if (operator[c].getPrev1() == n) {
-                        operator[c].setPrev1(null);
+                if (operators[r][c] != null) {
+                    if (operators[r][c] instanceof Custom){
+                        for (Operator temp : ((Custom) operators[r][c]).getInputs()){
+                            if (temp.getPrev1() == n){
+                                temp.setPrev1(null);
+                            }
+                        }
                     }
-                    if (operator[c] instanceof Operator2I && ((Operator2I) operator[c]).getPrev2() == n) {
-                        operator[c].setPrev1(null);
+                    else {
+                        if (operators[r][c].getPrev1() == n) {
+                            operators[r][c].setPrev1(null);
+                        }
+                        if (operators[r][c] instanceof Operator2I && ((Operator2I) operators[r][c]).getPrev2() == n) {
+                            operators[r][c].setPrev1(null);
+                        }
                     }
                 }
             }
@@ -451,23 +460,21 @@ public class GUI extends JPanel implements MouseListener, MouseMotionListener {
     public void insert(Operator n){
         Button b = buttons.get(customIndex(n.getRow(), n.getCol()));
         operators[b.getCol()][b.getRow()] = n;
-        /*
-        if (operators[tempRow][tempCol] instanceof Custom){ //custom block
-            Operator temp = ((Custom) operators[tempRow][tempCol]).getFirstEmpty();
-            if (temp != null){
-                temp.setPrev1(operators[(int) firstInput.getY()][(int) firstInput.getX()]);
-            }
-            else{
-                break;
+
+        if (n instanceof Custom){
+            for (Operator temp : ((Custom) n).getInputs()){
+                if (temp.getPrev1() != null) {
+                    getWireCoords(temp.getPrev1().getRow(), temp.getPrev1().getCol(), b.getRow(), b.getCol(), n.getColor());
+                }
             }
         }
-        */
-         */
-        if (n.getPrev1() != null) {
+        else {
+            if (n.getPrev1() != null) {
                 getWireCoords(n.getPrev1().getRow(), n.getPrev1().getCol(), b.getRow(), b.getCol(), n.getColor());
-        }
-        if (n instanceof Operator2I && ((Operator2I) n).getPrev2() != null){
+            }
+            if (n instanceof Operator2I && ((Operator2I) n).getPrev2() != null) {
                 getWireCoords(((Operator2I) n).getPrev2().getRow(), ((Operator2I) n).getPrev2().getCol(), b.getRow(), b.getCol(), ((Operator2I) n).getColor2());
+            }
         }
         if(n instanceof NotBlock){
             b.setRegularImage(notImage);
@@ -524,7 +531,7 @@ public class GUI extends JPanel implements MouseListener, MouseMotionListener {
                         insert(block);
                     }
                 } catch (IOException | ClassNotFoundException e) {
-                    throw new RuntimeException(e);
+                    System.out.println("File does not exist!");
                 }
             }
             case KeyEvent.VK_S -> {
@@ -542,7 +549,7 @@ public class GUI extends JPanel implements MouseListener, MouseMotionListener {
             }
             case KeyEvent.VK_T -> {
                 try {
-                    insert(new Custom(5, 5, FileManager.readFile("Saves/orblock.txt"), "orblock"));
+                    insert(new Custom(5, 5, FileManager.readFile("Saves/xor.txt"), "xor"));
                 } catch (IOException | ClassNotFoundException e) {
                     throw new RuntimeException(e);
                 }
