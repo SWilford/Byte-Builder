@@ -155,6 +155,6 @@ public class Wire {
     }
 
     public boolean contains(int x, int y) {
-        return Line2D.ptSegDist(x1, y1, x2, y2, x, y) > 3;
+        return Line2D.ptSegDist(x1, y1, x2, y2, x, y) < 7;
     }
 }
