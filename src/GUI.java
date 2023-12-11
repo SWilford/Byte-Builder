@@ -550,18 +550,6 @@ public class GUI extends JPanel implements MouseListener, MouseMotionListener {
         }
     }
 
-    public LinkedList<Operator> toList(){
-        LinkedList<Operator> arr = new LinkedList<>();
-        for (Operator[] op: operators){
-            for (Operator n: op){
-                if (n != null){
-                    arr.add(n);
-                }
-            }
-        }
-        return arr;
-    }
-
     public void mouseMoved(MouseEvent e) { //When mouse is moved, highlighting is updated
         mouseX = e.getX();
         mouseY = e.getY();
@@ -617,7 +605,7 @@ public class GUI extends JPanel implements MouseListener, MouseMotionListener {
                     throw new RuntimeException(e);
                 }
             }
-            
+
         }
         updateHighlighting();
     }
