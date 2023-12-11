@@ -7,6 +7,8 @@ public class Wire {
 
     public boolean selected;
 
+    private boolean mouseCovering;
+
     private Color clr, baseColor;
     private Color highlightColor, highlightColor2;
 
@@ -50,6 +52,7 @@ public class Wire {
         highlightColor2 = new Color(hR2, hG2, hB2);
 
         wireColored = false;
+        mouseCovering = false;
 
     }
 
@@ -147,14 +150,36 @@ public class Wire {
 
     public void drawWire(Graphics g) {
         Graphics2D g2 = (Graphics2D)g;
-        Stroke wireStroke = new BasicStroke(3);
-        g2.setColor(clr);
+        Stroke wireStroke;
+        if(mouseCovering) {
+            wireStroke = new BasicStroke(5);
+        }
+        else {
+            wireStroke = new BasicStroke(3);
+        }
+
         g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+
+        if(selected) {
+            Stroke selectedStroke = new BasicStroke(10);
+            g2.setColor(Color.BLACK);
+            g2.setStroke(selectedStroke);
+            g2.drawLine(x1, y1, x2, y2);
+        }
         g2.setStroke(wireStroke);
+        g2.setColor(clr);
         g2.drawLine(x1, y1, x2, y2);
     }
 
     public boolean contains(int x, int y) {
         return Line2D.ptSegDist(x1, y1, x2, y2, x, y) < 7;
+    }
+
+    public boolean isMouseCovering() {
+        return mouseCovering;
+    }
+
+    public void setMouseCovering(Boolean b) {
+        mouseCovering = b;
     }
 }

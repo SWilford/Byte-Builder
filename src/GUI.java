@@ -15,6 +15,9 @@ public class GUI extends JPanel implements MouseListener, MouseMotionListener {
     public boolean toolSelected; //If a tool has been selected or not (any tool)
     public ArrayList<Button> toolButtons = new ArrayList<>(); //Stores buttons in the toolbar
     public ArrayList<Wire> wires = new ArrayList<>(); // stores wires to be drawn
+
+    private int wireToDelete;
+
     private int toSel;
 
     private boolean mouseOverWire;
@@ -72,6 +75,7 @@ public class GUI extends JPanel implements MouseListener, MouseMotionListener {
         selectedWire = -1;
         wireIsSelected = false;
         mouseOverWire = false;
+        wireToDelete = -1;
     }
 
     public void display(Graphics g) { //Draws buttons
@@ -329,14 +333,30 @@ public class GUI extends JPanel implements MouseListener, MouseMotionListener {
                     }
                 }
             }
-            for(Wire w : wires) { //if a wire is selected you can change the color of that wire
-                if(w.contains(mouseX, mouseY)) {
-                    selectWire(wires.indexOf(w));
+            if(!wires.isEmpty()) {
+                for (Wire w : wires) { //if a wire is selected you can change the color of that wire
+                    if (w.contains(mouseX, mouseY) && !toolHeld.equals("trash")) {
+                        selectWire(wires.indexOf(w));
+                        System.out.println("Wire at index "+wires.indexOf(w)+" selected!");
+                    }
+                    if (w.contains(mouseX, mouseY) && toolHeld.equals("trash")) {
+                        int tempCol = ((w.getX1() - 240) / 48);
+                        int tempRow = (w.getY1() / 48);
+                        deletePointersTo(operators[tempRow][tempCol]);
+                        wireToDelete = wires.indexOf(w);
+                    }
                 }
-            }
-            for(Button b : wireColors) {
-                if(b.getShape().contains(mouseX, mouseY) && wireIsSelected) {
-                    wires.get(selectedWire).setColor(b.getTitle());
+                if (wireToDelete != -1) {
+                    wires.remove(wireToDelete);
+                    selectedWire = -1;
+                    wireIsSelected = false;
+                    wireToDelete = -1;
+                    mouseOverWire = false;
+                }
+                for (Button b : wireColors) {
+                    if (b.getShape().contains(mouseX, mouseY) && wireIsSelected) {
+                        wires.get(selectedWire).setColor(b.getTitle());
+                    }
                 }
             }
         }
@@ -350,10 +370,11 @@ public class GUI extends JPanel implements MouseListener, MouseMotionListener {
             wireIsSelected = false;
         }
         else {
+            selectedWire = select;
             for(Wire w : wires) {
                 w.setSelected(wires.indexOf(w) == selectedWire);
             }
-            selectedWire = select;
+
             wireIsSelected = true;
         }
         repaint();
@@ -442,6 +463,13 @@ public class GUI extends JPanel implements MouseListener, MouseMotionListener {
         else {
             wireToCursor = null;
         }
+
+        if(!wires.isEmpty()) {
+            for(Wire w : wires) {
+                w.setMouseCovering(w.contains(mouseX, mouseY));
+            }
+        }
+
         /*for(Wire w : wires) { old wire highlighting
             if(w.isSelected() && !w.isWireColored()) {
                 w.selectionHighlight();
