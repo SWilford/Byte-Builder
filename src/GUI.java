@@ -558,7 +558,7 @@ public class GUI extends JPanel implements MouseListener, MouseMotionListener {
         }
         updateHighlighting();
     }
-
+//s
     public void processUserInput(int k){ //k is key input from kb
         switch (k){
             case KeyEvent.VK_ESCAPE -> {
