@@ -3,6 +3,11 @@ public class Light extends Operator{
     public Light(int r, int c, Operator n){
         super(r, c, n);
     }
+
+    public Light(int row, int col, Operator n, String color) {
+        super(row, col, n, color);
+    }
+
     public boolean getOutput() {
         if (previous1 == null){
             return false;

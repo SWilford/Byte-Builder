@@ -1,0 +1,4 @@
+Switch, red, 2, 6
+AndBlock, red, 6, 7, 0, 3
+Light, red, 9, 7, 1
+Switch, red, 2, 8

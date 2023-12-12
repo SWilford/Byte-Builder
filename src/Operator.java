@@ -1,12 +1,23 @@
+
 public abstract class Operator {
     protected Operator previous1;
     protected int row, col;
+
+    protected String color;
 
     public Operator(int r, int c, Operator n){
         previous1 = n;
         row = r;
         col = c;
+        color = "red";
     } //add
+
+    public Operator(int r, int c, Operator n, String colour) {
+        previous1 = n;
+        row = r;
+        col = c;
+        color = colour;
+    }
 
     public Operator getPrev1() {
         return previous1;
@@ -30,4 +41,13 @@ public abstract class Operator {
     public String toString(){
         return this.getClass().getName() + " Prev: " + previous1 + " (" + row + ", " + col + ")";
     }
+
+    public void setColor(String c) {
+        color = c;
+    }
+
+    public String getColor() {
+        return color;
+    }
+
 }

@@ -1,5 +1,6 @@
 import javax.swing.*;
 import java.awt.event.*;
+import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Array;
 import java.util.*;
@@ -14,7 +15,16 @@ public class GUI extends JPanel implements MouseListener, MouseMotionListener {
     public boolean toolSelected; //If a tool has been selected or not (any tool)
     public ArrayList<Button> toolButtons = new ArrayList<>(); //Stores buttons in the toolbar
     public ArrayList<Wire> wires = new ArrayList<>(); // stores wires to be drawn
+
+    private int wireToDelete;
+
     private int toSel;
+
+    private boolean mouseOverWire;
+
+    private int selectedWire;
+    private boolean wireIsSelected;
+
     public ArrayList<Button> wireColors = new ArrayList<>();
     public String currentWireColor;
 
@@ -62,6 +72,10 @@ public class GUI extends JPanel implements MouseListener, MouseMotionListener {
         wireToCursor = null;
         createWireColors();
         currentWireColor = "red";
+        selectedWire = -1;
+        wireIsSelected = false;
+        mouseOverWire = false;
+        wireToDelete = -1;
     }
 
     public void display(Graphics g) { //Draws buttons
@@ -81,14 +95,7 @@ public class GUI extends JPanel implements MouseListener, MouseMotionListener {
                 g2.drawLine(x, y, 1440, y);
             }
         }
-        boolean cBool = false;
-        for(Wire w : wires) {
-            if (w.isSelected()) {
-                cBool = true;
-                break;
-            }
-        }
-        if(toolHeld.equals("wire") || cBool) {
+        if(toolHeld.equals("wire") || wireIsSelected) {
             for(Button b: wireColors) {
                 b.drawButton(g);
             }
@@ -237,7 +244,7 @@ public class GUI extends JPanel implements MouseListener, MouseMotionListener {
                 }
             }
             for (Button b : buttons) { //When mouse is clicked on a grid button
-                if (b.getShape().contains(mouseX, mouseY)) {
+                if (b.getShape().contains(mouseX, mouseY) && !mouseOverWire) {
                     int tempCol = b.getRow();
                     int tempRow = b.getCol();
                     switch (toolHeld) {
@@ -251,17 +258,25 @@ public class GUI extends JPanel implements MouseListener, MouseMotionListener {
                                 if (firstInput == null) {
                                     firstInput = new Point(tempCol, tempRow);
                                 } else {
-                                    if (operators[tempRow][tempCol] instanceof OnBlock || operators[tempRow][tempCol] instanceof Switch){
+                                    if (operators[tempRow][tempCol] instanceof OnBlock || operators[tempRow][tempCol] instanceof Switch || operators[tempRow][tempCol].isFull()){ //do nothing since start
                                         break;
                                     }
-                                    if (operators[tempRow][tempCol].isFull()){
-                                        break;
+                                    if (operators[tempRow][tempCol] instanceof Custom){ //custom block
+                                        Operator temp = ((Custom) operators[tempRow][tempCol]).getFirstEmpty();
+                                        if (temp != null){
+                                            temp.setPrev1(operators[(int) firstInput.getY()][(int) firstInput.getX()]);
+                                        }
+                                        else{
+                                            break;
+                                        }
                                     }
-                                    if(operators[tempRow][tempCol] instanceof Operator2I && operators[tempRow][tempCol].getPrev1() != null){
-                                        ((Operator2I) operators[tempRow][tempCol]).setPrev2(operators[(int) firstInput.getY()][(int) firstInput.getX()]);
+                                    else if(operators[tempRow][tempCol] instanceof Operator2I && operators[tempRow][tempCol].getPrev1() != null){ //if it has two inputs and the first is taken
+                                        ((Operator2I) operators[tempRow][tempCol]).setPrev2(operators[(int) firstInput.getY()][(int) firstInput.getX()]); //Go to the second slot
+                                        ((Operator2I)operators[tempRow][tempCol]).setColor2(currentWireColor);
                                     }
-                                    else{
+                                    else{ //first slot
                                         operators[tempRow][tempCol].setPrev1(operators[(int) firstInput.getY()][(int) firstInput.getX()]); //set 2nd operator's previous to 1st operator
+                                        operators[tempRow][tempCol].setColor(currentWireColor);
                                     }
                                     getWireCoords((int)firstInput.getX(), (int)firstInput.getY(), tempCol,tempRow);
                                     firstInput = null; //reset
@@ -311,27 +326,6 @@ public class GUI extends JPanel implements MouseListener, MouseMotionListener {
                     }
                 }
             }
-            int toDel = -1;
-            for(Wire w : wires) {
-                if(w.contains(mouseX, mouseY)) {
-                    w.setSelected(!w.isSelected());
-                    toSel = wires.indexOf(w);
-                    if(w.isSelected() && toolHeld.equals("trash")) {
-                        int tempCol =((w.getX1()-240)/48);
-                        int tempRow =(w.getY1()/48);
-                        deletePointersTo(operators[tempRow][tempCol]);
-                        toDel = wires.indexOf(w);
-                    }
-                }
-            }
-            for(Wire w : wires) {
-                if(wires.indexOf(w) !=toSel) {
-                    w.setSelected(false);
-                }
-            }
-            if(toDel != -1) {
-                wires.remove(toDel);
-            }
             if(toolHeld.equals("wire")) {
                 for (Button b : wireColors) { //when wireColor button is clicked
                     if(b.getShape().contains(mouseX, mouseY)) {
@@ -339,12 +333,29 @@ public class GUI extends JPanel implements MouseListener, MouseMotionListener {
                     }
                 }
             }
-            for(Wire w : wires) {
-                if(w.isSelected()) {
-                    for(Button b : wireColors) {
-                        if(b.getShape().contains(mouseX, mouseY)) {
-                            w.setColor(b.getTitle());
-                        }
+            if(!wires.isEmpty()) {
+                for (Wire w : wires) { //if a wire is selected you can change the color of that wire
+                    if (w.contains(mouseX, mouseY) && !toolHeld.equals("trash")) {
+                        selectWire(wires.indexOf(w));
+                        System.out.println("Wire at index "+wires.indexOf(w)+" selected!");
+                    }
+                    if (w.contains(mouseX, mouseY) && toolHeld.equals("trash")) {
+                        int tempCol = ((w.getX1() - 240) / 48);
+                        int tempRow = (w.getY1() / 48);
+                        deletePointersTo(operators[tempRow][tempCol]);
+                        wireToDelete = wires.indexOf(w);
+                    }
+                }
+                if (wireToDelete != -1) {
+                    wires.remove(wireToDelete);
+                    selectedWire = -1;
+                    wireIsSelected = false;
+                    wireToDelete = -1;
+                    mouseOverWire = false;
+                }
+                for (Button b : wireColors) {
+                    if (b.getShape().contains(mouseX, mouseY) && wireIsSelected) {
+                        wires.get(selectedWire).setColor(b.getTitle());
                     }
                 }
             }
@@ -352,15 +363,42 @@ public class GUI extends JPanel implements MouseListener, MouseMotionListener {
         updateHighlighting();
     }
 
+    private void selectWire(int select) {
+        if(selectedWire == select) {
+            wires.get(selectedWire).setSelected(false);
+            selectedWire = -1;
+            wireIsSelected = false;
+        }
+        else {
+            selectedWire = select;
+            for(Wire w : wires) {
+                w.setSelected(wires.indexOf(w) == selectedWire);
+            }
+
+            wireIsSelected = true;
+        }
+        repaint();
+    }
+
+
     private void deletePointersTo(Operator n){
-        for (Operator[] operator : operators) {
+        for (int r = 0; r < operators.length; r++) {
             for (int c = 0; c < operators[0].length; c++) {
-                if (operator[c] != null) {
-                    if (operator[c].getPrev1() == n) {
-                        operator[c].setPrev1(null);
+                if (operators[r][c] != null) {
+                    if (operators[r][c] instanceof Custom){
+                        for (Operator temp : ((Custom) operators[r][c]).getInputs()){
+                            if (temp.getPrev1() == n){
+                                temp.setPrev1(null);
+                            }
+                        }
                     }
-                    if (operator[c] instanceof Operator2I && ((Operator2I) operator[c]).getPrev2() == n) {
-                        operator[c].setPrev1(null);
+                    else {
+                        if (operators[r][c].getPrev1() == n) {
+                            operators[r][c].setPrev1(null);
+                        }
+                        if (operators[r][c] instanceof Operator2I && ((Operator2I) operators[r][c]).getPrev2() == n) {
+                            operators[r][c].setPrev1(null);
+                        }
                     }
                 }
             }
@@ -425,7 +463,14 @@ public class GUI extends JPanel implements MouseListener, MouseMotionListener {
         else {
             wireToCursor = null;
         }
-        for(Wire w : wires) {
+
+        if(!wires.isEmpty()) {
+            for(Wire w : wires) {
+                w.setMouseCovering(w.contains(mouseX, mouseY));
+            }
+        }
+
+        /*for(Wire w : wires) { old wire highlighting
             if(w.isSelected() && !w.isWireColored()) {
                 w.selectionHighlight();
             }
@@ -438,7 +483,7 @@ public class GUI extends JPanel implements MouseListener, MouseMotionListener {
             else {
                 w.unHighlight();
             }
-        }
+        }*/
         repaint();
         for(Button b: wireColors) {
             if(currentWireColor.equals(b.getTitle()) && !b.isToolbarColored()) {
@@ -462,22 +507,21 @@ public class GUI extends JPanel implements MouseListener, MouseMotionListener {
 
     public void insert(Operator n){
         Button b = buttons.get(customIndex(n.getRow(), n.getCol()));
-        ArrayList<String> cl = FileManager.getColors();
         operators[b.getCol()][b.getRow()] = n;
-        if (n.getPrev1() != null) {
-            if (!cl.isEmpty()) {
-                getWireCoords(n.getPrev1().getRow(), n.getPrev1().getCol(), b.getRow(), b.getCol(), cl.remove(0));
-            }
-            else{
-                getWireCoords(n.getPrev1().getRow(), n.getPrev1().getCol(), b.getRow(), b.getCol());
+
+        if (n instanceof Custom){
+            for (Operator temp : ((Custom) n).getInputs()){
+                if (temp.getPrev1() != null) {
+                    getWireCoords(temp.getPrev1().getRow(), temp.getPrev1().getCol(), b.getRow(), b.getCol(), n.getColor());
+                }
             }
         }
-        if (n instanceof Operator2I && ((Operator2I) n).getPrev2() != null){
-            if (!cl.isEmpty()) {
-                getWireCoords(((Operator2I) n).getPrev2().getRow(), ((Operator2I) n).getPrev2().getCol(), b.getRow(), b.getCol(), cl.remove(0));
+        else {
+            if (n.getPrev1() != null) {
+                getWireCoords(n.getPrev1().getRow(), n.getPrev1().getCol(), b.getRow(), b.getCol(), n.getColor());
             }
-            else{
-                getWireCoords(n.getPrev1().getRow(), n.getPrev1().getCol(), b.getRow(), b.getCol());
+            if (n instanceof Operator2I && ((Operator2I) n).getPrev2() != null) {
+                getWireCoords(((Operator2I) n).getPrev2().getRow(), ((Operator2I) n).getPrev2().getCol(), b.getRow(), b.getCol(), ((Operator2I) n).getColor2());
             }
         }
         if(n instanceof NotBlock){
@@ -501,14 +545,20 @@ public class GUI extends JPanel implements MouseListener, MouseMotionListener {
         if (n instanceof Output){
             b.setRegularImage(outImage);
         }
+        if (n instanceof Custom){
+            b.setRegularImage(GreenWire);
+        }
     }
 
     public void mouseMoved(MouseEvent e) { //When mouse is moved, highlighting is updated
         mouseX = e.getX();
         mouseY = e.getY();
+        for(Wire w : wires) {
+            mouseOverWire = w.contains(mouseX, mouseY);
+        }
         updateHighlighting();
     }
-
+//s
     public void processUserInput(int k){ //k is key input from kb
         switch (k){
             case KeyEvent.VK_ESCAPE -> {
@@ -527,17 +577,51 @@ public class GUI extends JPanel implements MouseListener, MouseMotionListener {
             case KeyEvent.VK_9 -> toolButtonHelper("output");
             case KeyEvent.VK_L -> {
                 try {
-                    LinkedList<Operator> blocks = FileManager.readFile("Saves/orblock.txt");
+                    LinkedList<Operator> blocks = FileManager.readFile("Saves/untitled.txt");
                     for (Operator block : blocks) {
                         insert(block);
                     }
                 } catch (IOException | ClassNotFoundException e) {
+                    System.out.println("File does not exist!");
+                }
+            }
+            case KeyEvent.VK_S -> {
+                File n = new File("Saves/untitled.txt");
+                if (!n.exists()){
+                    try {
+                        n.createNewFile();
+                    } catch (IOException ignored) {}
+                }
+                if (n.exists()){
+                    try {
+                        FileManager.writeToFile(toList(), "Saves/untitled.txt");
+                    } catch (IOException ignored) {}
+                }
+            }
+            case KeyEvent.VK_T -> {
+                try {
+                    insert(new Custom(5, 5, FileManager.readFile("Saves/xor.txt"), "xor"));
+                } catch (IOException | ClassNotFoundException e) {
                     throw new RuntimeException(e);
                 }
             }
+
         }
         updateHighlighting();
     }
+
+    public LinkedList<Operator> toList(){
+        LinkedList<Operator> arr = new LinkedList<>();
+        for (Operator[] op: operators){
+            for (Operator n: op){
+                if (n != null){
+                    arr.add(n);
+                }
+            }
+        }
+        return arr;
+    }
+
 
     public void mousePressed(MouseEvent e) {
         repaint();

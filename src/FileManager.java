@@ -6,7 +6,6 @@ public class FileManager {
      * @param fileName    String of name of file to find size of
      * @return    Returns size of fileName
      */
-    private static ArrayList<String> colors;
     public static int getFileSize(String fileName)throws IOException
     {
         Scanner input = new Scanner(new FileReader(fileName));
@@ -21,41 +20,101 @@ public class FileManager {
     }
 
     public static LinkedList<Operator> readFile(String fileName) throws IOException, ClassNotFoundException { //returns array of operators that have their connections
-        colors = new ArrayList<>();
         LinkedList<Operator> arr = new LinkedList<>();
+        LinkedList<String[]> inputs = new LinkedList<>();
         Scanner input = new Scanner(new FileReader(fileName));
         while (input.hasNextLine()){
             String[] thing = input.nextLine().split(",");
-            int col = Integer.parseInt(thing[3].trim());
-            System.out.println(col);
-            int row = Integer.parseInt(thing[2].trim());
-            Operator input1 = null;
-            Operator input2 = null;
-            if (thing.length > 4){
-                input1 = arr.get(Integer.parseInt(thing[4].trim()));
-                if (thing.length > 5){
-                    input2 = arr.get(Integer.parseInt(thing[5].trim()));
+            int col = Integer.parseInt(thing[4].trim());
+            int row = Integer.parseInt(thing[3].trim());
+            if (thing.length > 6){
+                inputs.add(new String[]{thing[5].trim(), thing[6].trim()});
+            } else if (thing.length == 6) {
+                inputs.add(new String[]{thing[5].trim(), null});
+            }
+            else{
+                inputs.add(new String[]{null, null});
+
+            }
+
+            String color = thing[1].trim();
+            String color2 = thing[2].trim();
+
+            if (thing[0].contains("(")){ //custom
+                String name = thing[0].substring(thing[0].indexOf("(")+1,thing[0].indexOf(")"));
+                arr.add(new Custom(row, col, FileManager.readFile("Saves/" + name + ".txt"), name));
+            }
+            else {
+                switch (thing[0].trim()) {
+                    case "NotBlock" ->  arr.add(new NotBlock(row, col, null, color));
+                    case "AndBlock" ->  arr.add(new AndBlock(row, col, null, null, color, color2));
+                    case "OnBlock" ->   arr.add(new OnBlock(row, col));
+                    case "Light" ->     arr.add(new Light(row, col, null, color));
+                    case "Switch" ->    arr.add(new Switch(row, col));
+                    case "Input" ->     arr.add(new Input(row, col, color));
+                    case "Output" ->    arr.add(new Output(row, col, null, color));
                 }
             }
-            if (!thing[1].trim().equals("null")){
-                for (int i = 4; i < thing.length; i++)
-                    colors.add(thing[1].trim());
+        }
+        for (Operator operator : arr) { //buffer for inputs
+            String[] temp = inputs.removeFirst();
+            if (operator instanceof Custom){
+                if (temp[0] != null) {
+                    ((Custom) operator).getFirstEmpty().setPrev1(arr.get(Integer.parseInt(temp[0])));
+                }
+                if (temp[1] != null) {
+                    ((Custom) operator).getFirstEmpty().setPrev1(arr.get(Integer.parseInt(temp[1])));
+                }
             }
-            switch (thing[0].trim()){
-                case "NotBlock" ->  arr.add(new NotBlock(row, col, input1));
-                case "AndBlock" ->  arr.add(new AndBlock(row, col, input1, input2));
-                case "OnBlock" ->   arr.add(new OnBlock(row, col));
-                case "Light" ->     arr.add(new Light(row, col, input1));
-                case "Switch" ->    arr.add(new Switch(row, col));
-                case "Input" ->     arr.add(new Input(row, col));
-                case "Output" ->    arr.add(new Output(row, col, input1));
+            else {
+                if (temp[0] != null) {
+                    operator.setPrev1(arr.get(Integer.parseInt(temp[0])));
+                }
+                if (temp[1] != null) {
+                    ((Operator2I) operator).setPrev2(arr.get(Integer.parseInt(temp[1])));
+                }
             }
         }
         input.close();
         return arr;
     }
 
-    public static ArrayList<String> getColors(){
-        return colors;
+    public static void writeToFile(LinkedList<Operator> array, String filename) throws IOException
+    {
+        System.setOut(new PrintStream(new FileOutputStream(filename)));
+        for(int i = 0; i < array.size(); i++){
+            Operator op = array.get(i);
+            String n = op.getClass().getName();
+            if (n.equals("Custom")){
+                n += "("+ ((Custom)op).getName()+")";
+            }
+            String color = op.getColor();
+            String color2 = "null";
+            if (op instanceof Operator2I) {
+                color2 = ((Operator2I) op).getColor2();
+            }
+            int col = op.getCol();
+            int row = op.getRow();
+
+
+            String line = n + ", " + color + ", " + color2 + ", " + col + ", " + row;
+
+            if (op instanceof Custom){
+                for (Operator temp : ((Custom) op).getInputs()){
+                    line += ", " + array.indexOf(temp.getPrev1());
+                }
+            }
+            else {
+                if (op.getPrev1() != null) {
+                    line += ", " + array.indexOf(op.getPrev1());
+                }
+                if (op instanceof Operator2I && ((Operator2I) op).getPrev2() != null) {
+                    line += ", " + array.indexOf(((Operator2I) op).getPrev2());
+                }
+            }
+            System.out.println(line);
+        }
+        System.out.flush();
+        System.setOut(new PrintStream(new FileOutputStream(FileDescriptor.out)));
     }
 }
