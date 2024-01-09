@@ -2,23 +2,25 @@ import javax.swing.*;
 import java.awt.event.*;
 import java.io.File;
 import java.io.IOException;
-import java.lang.reflect.Array;
 import java.util.*;
 import java.awt.*;
 
-public class GUI extends JPanel implements MouseListener, MouseMotionListener {
+public class GUI extends JPanel implements MouseListener, MouseMotionListener, MouseWheelListener {
 
     private final ArrayList<Button> buttons = new ArrayList<>(); //stores buttons in the grid
-    private final Operator [][] operators = new Operator[25][25]; //the actual array of operators
+    private final Operator [][] operators = new Operator[50][50]; //the actual array of operators
 
     public String toolHeld = ""; //the title of the tool which is currently selected
     public boolean toolSelected; //If a tool has been selected or not (any tool)
     public ArrayList<Button> toolButtons = new ArrayList<>(); //Stores buttons in the toolbar
     public ArrayList<Wire> wires = new ArrayList<>(); // stores wires to be drawn
 
+
+
     private int wireToDelete;
 
-    private int toSel;
+    private int ZoomLevel;
+
 
     private boolean mouseOverWire;
 
@@ -58,9 +60,9 @@ public class GUI extends JPanel implements MouseListener, MouseMotionListener {
     //End of Image Icons
 
     public GUI() {
-        toSel = -1;
         this.setPreferredSize(new Dimension(1440, 1200)); //Manually sets size of JFrame
         addMouseListener(this); //Listeners
+        addMouseWheelListener(this);
         addMouseMotionListener(this);
         mouseX = 0; //Initializes mouse position to 0, 0
         mouseY = 0;
@@ -76,6 +78,7 @@ public class GUI extends JPanel implements MouseListener, MouseMotionListener {
         wireIsSelected = false;
         mouseOverWire = false;
         wireToDelete = -1;
+        ZoomLevel = 0;
     }
 
     public void display(Graphics g) { //Draws buttons
@@ -632,4 +635,23 @@ public class GUI extends JPanel implements MouseListener, MouseMotionListener {
     public void mouseEntered(MouseEvent e) {}
     public void mouseExited(MouseEvent e) {}
     public void mouseDragged(MouseEvent e) {}
+
+    @Override
+    public void mouseWheelMoved(MouseWheelEvent e) {//Used for Zooming, 0 represents base zoom level, anything above that is zoomed in, anything below is zoomed out
+        /*if(scrollChecker > 0) { //Wheel is scrolled away from you
+            ZoomLevel--;
+            if(ZoomLevel < -5) {
+                ZoomLevel = -5;
+            }
+        }
+        else { //Wheel is scrolled towards you
+            ZoomLevel++;
+            if(ZoomLevel > 5) {
+                ZoomLevel = 5;
+            }
+        }*/
+
+    }
+
+
 }
