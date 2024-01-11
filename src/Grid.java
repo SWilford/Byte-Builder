@@ -4,9 +4,7 @@ import java.awt.event.*;
 import java.util.ArrayList;
 
 public class Grid extends JPanel implements MouseListener, MouseMotionListener, MouseWheelListener {
-    private final ArrayList<Button> buttons = new ArrayList<>(); //stores buttons in the grid
-    //private final Operator [][] operators = new Operator[50][50]; //the actual array of operators
-    private final SparseMatrix operators = new SparseMatrix(50, 50);
+    private final SparseMatrix cells = new SparseMatrix(49, 49);
     public ArrayList<Wire> wires = new ArrayList<>(); // stores wires to be drawn
     private boolean mouseOverWire;
     public String currentWireColor;
@@ -15,9 +13,11 @@ public class Grid extends JPanel implements MouseListener, MouseMotionListener, 
     private boolean wireIsSelected;
     public ArrayList<Button> wireColors = new ArrayList<>();
     public Wire wireToCursor; //The wire being generated when wire tool is selected
-    private static int mouseX; //X position of cursor
-    private static int mouseY; //Y position of cursor
+    private int mouseX; //X position of cursor
+    private int mouseY; //Y position of cursor
     private static Point firstInput; //variable for first component clicked for 2, used for making wiring
+
+    private int cellWidth = 50;
 
     private double x, y, scale;
 
@@ -35,7 +35,9 @@ public class Grid extends JPanel implements MouseListener, MouseMotionListener, 
     private final ImageIcon outImage = new ImageIcon("Images/Output.png");
 
     public Grid() {
-        this.setPreferredSize(new Dimension(1440, 1200)); //Manually sets size of JFrame
+
+        setLayout(new GridLayout(50, 50));
+
         addMouseListener(this); //Listeners
         addMouseWheelListener(this);
         addMouseMotionListener(this);
@@ -50,16 +52,66 @@ public class Grid extends JPanel implements MouseListener, MouseMotionListener, 
         wireToDelete = -1;
         x = 0;
         y = 0;
+        scale = 1;
+        mouseX = -1;
+        mouseY = -1;
+
+        this.setBackground(new Color(48,48, 48));
+
     }
 
     public void display(Graphics g) {
         //Find box in top left, find box in bottom right
         //draw everything between
         //COMBINE EACH COMPONENT AND BUTTON
+
+        int LeftX = (int)x/cellWidth;
+        int LeftY = (int)y/cellWidth;
+
+        int myWidth = this.getWidth();
+        int myHeight = this.getHeight();
+
+        int RightX = (int)Math.ceil(toXCoord(myWidth)/cellWidth);
+        int RightY = (int)Math.ceil(toYCoord(myHeight)/cellWidth);
+
+        g.setColor(new Color(48, 48, 48));
+
+        for(int i = LeftX; i <= RightX; i++) {
+            for(int j = LeftY; j <= RightY; j++) {
+                g.fillRect(toXPosOnWindow((i-1)*cellWidth), toYPosOnWindow((j-1)*cellWidth), toXPosOnWindow(x+cellWidth), toXPosOnWindow(x+cellWidth));
+            }
+        }
+
+        g.setColor(new Color(90, 90, 90));
+
+        if(mouseX != -1) {
+            g.fillRect(toXPosOnWindow((mouseX)*cellWidth), toYPosOnWindow((mouseY)*cellWidth), toXPosOnWindow(x+cellWidth), toXPosOnWindow(x+cellWidth));
+        }
+
+        g.setColor(Color.BLACK);
+
+        for(int i = LeftX; i <= RightX; i++) {
+            g.drawLine(toXPosOnWindow(i*cellWidth), 0, toXPosOnWindow(i*cellWidth), myHeight);
+        }
+
+        for(int i = LeftY; i <= RightY; i++) {
+            g.drawLine(0, toYPosOnWindow(i*cellWidth), myWidth, toYPosOnWindow(i*cellWidth));
+        }
+
     }
+
+    @Override
+    public void paintComponent(Graphics g) {
+        super.paintComponent(g);
+        display(g);
+    }
+
 
     private void zoom(double scaleFactor, double x, double y) { // Thanks to BH for the code!!!
         if ((scaleFactor < 1 && scale <= 0.0625)) {
+            return;
+        }
+        if ((scaleFactor > 1 && scale >= 3)) {
             return;
         }
         if (scaleFactor < 1) {
@@ -111,7 +163,9 @@ public class Grid extends JPanel implements MouseListener, MouseMotionListener, 
 
     @Override
     public void mouseExited(MouseEvent e) {
-
+        mouseX = -1;
+        mouseY = -1;
+        repaint();
     }
 
     @Override
@@ -121,7 +175,13 @@ public class Grid extends JPanel implements MouseListener, MouseMotionListener, 
 
     @Override
     public void mouseMoved(MouseEvent e) {
+        System.out.println(toXCoord(e.getX()));
+        mouseX = (int)Math.floor(toXCoord(e.getX())/cellWidth);
+        mouseY = (int)Math.floor(toYCoord(e.getY())/cellWidth);
 
+
+
+        repaint();
     }
 
     @Override

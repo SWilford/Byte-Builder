@@ -7,6 +7,8 @@ import java.awt.*;
 
 public class GUI extends JPanel implements MouseListener, MouseMotionListener, MouseWheelListener {
 
+    private Grid grid;
+
     private final ArrayList<Button> buttons = new ArrayList<>(); //stores buttons in the grid
     private final Operator [][] operators = new Operator[50][50]; //the actual array of operators
 
@@ -81,7 +83,18 @@ public class GUI extends JPanel implements MouseListener, MouseMotionListener, M
         ZoomLevel = 0;
     }
 
+    public GUI(int bbb) {
+        setLayout(new BorderLayout());
+        grid = new Grid();
+        Toolbar toolbar = new Toolbar();
+        this.add(grid, BorderLayout.CENTER);
+        //this.add(toolbar, BorderLayout.WEST);
+    }
+
     public void display(Graphics g) { //Draws buttons
+
+        grid.display(g);
+
         for(Button b:buttons) {
             b.drawButton(g);
         }
