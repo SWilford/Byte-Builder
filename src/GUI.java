@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.*;
 import java.awt.*;
+import javax.swing.plaf.basic.BasicScrollBarUI;
 
 public class GUI extends JPanel implements MouseListener, MouseMotionListener, MouseWheelListener {
 
@@ -84,11 +85,15 @@ public class GUI extends JPanel implements MouseListener, MouseMotionListener, M
     }
 
     public GUI(int bbb) {
-        setLayout(new BorderLayout());
+        setLayout(new BorderLayout(0, 0));
         grid = new Grid();
         Toolbar toolbar = new Toolbar();
         this.add(grid, BorderLayout.CENTER);
-        //this.add(toolbar, BorderLayout.WEST);
+        JScrollPane blank = new JScrollPane(toolbar, JScrollPane.VERTICAL_SCROLLBAR_NEVER, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+        blank.setBorder(null);
+        blank.getVerticalScrollBar().setUnitIncrement(12);
+
+        this.add(blank, BorderLayout.WEST);
     }
 
     public void display(Graphics g) { //Draws buttons
