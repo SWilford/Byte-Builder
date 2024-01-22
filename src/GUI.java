@@ -86,14 +86,14 @@ public class GUI extends JPanel implements MouseListener, MouseMotionListener, M
 
     public GUI(int bbb) {
         setLayout(new BorderLayout(0, 0));
-        grid = new Grid();
-        Toolbar toolbar = new Toolbar();
+        /*grid = new Grid();
+        Toolbar toolbar = new Toolbar(grid);
         this.add(grid, BorderLayout.CENTER);
         JScrollPane blank = new JScrollPane(toolbar, JScrollPane.VERTICAL_SCROLLBAR_NEVER, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
         blank.setBorder(null);
         blank.getVerticalScrollBar().setUnitIncrement(12);
 
-        this.add(blank, BorderLayout.WEST);
+        this.add(blank, BorderLayout.WEST);*/
     }
 
     public void display(Graphics g) { //Draws buttons

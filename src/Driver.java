@@ -5,9 +5,9 @@ import java.awt.event.KeyEvent;
 
 public class Driver {
 
-    public static GUI screen;
+    public static BuilderGUI screen;
     public static void main(String[] args) {
-        screen = new GUI(1);
+        screen = new BuilderGUI();
         JFrame frame = new JFrame("Byte Builder");
         frame.setSize(1450,1250);
         frame.setMinimumSize(new Dimension(1000, 800));
@@ -21,7 +21,7 @@ public class Driver {
     public static class listen implements KeyListener{ //keyboard stuff
         public void keyTyped(KeyEvent e){}
         public void keyPressed(KeyEvent e){
-            screen.processUserInput(e.getKeyCode());
+            //screen.processUserInput(e.getKeyCode());
         }
         public void keyReleased(KeyEvent e){
 

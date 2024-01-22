@@ -14,29 +14,37 @@ public class Toolbar extends JPanel implements MouseListener, MouseMotionListene
     private final ImageIcon inImage = new ImageIcon("Images/Input.png");
     private final ImageIcon outImage = new ImageIcon("Images/Output.png");
 
-    public Toolbar() {
+    private String toolHeld;
+    private boolean toolSelected;
+
+    private Grid associatedGrid;
+
+    public Toolbar(Grid grid) {
         setLayout(new GridLayout(0, 2, 0, 0));
         this.setBackground(new Color(48, 48, 48));
-        this.add(new ToolButton("Wire", wireToolImg));
-        this.add(new ToolButton("And", andImage));
-        this.add(new ToolButton("Not", notImage));
-        this.add(new ToolButton("Trash", trashImage));
-        this.add(new ToolButton("On", onImage));
-        this.add(new ToolButton("Light", lightOn));
-        this.add(new ToolButton("Switch", switchOff));
-        this.add(new ToolButton("In", inImage));
-        this.add(new ToolButton("Out", outImage));
-        this.add(new ToolButton("null", null));
-        this.add(new ToolButton("null", null));
-        this.add(new ToolButton("null", null));
-        this.add(new ToolButton("null", null));
-        this.add(new ToolButton("null", null));
-        this.add(new ToolButton("null", null));
-        this.add(new ToolButton("null", null));
-        this.add(new ToolButton("null", null));
-        this.add(new ToolButton("null", null));
-        this.add(new ToolButton("null", null));
-        this.add(new ToolButton("null", null));
+        this.add(new ToolButton("Wire", wireToolImg, this));
+        this.add(new ToolButton("And", andImage, this));
+        this.add(new ToolButton("Not", notImage, this));
+        this.add(new ToolButton("Trash", trashImage, this));
+        this.add(new ToolButton("On", onImage, this));
+        this.add(new ToolButton("Light", lightOn, this));
+        this.add(new ToolButton("Switch", switchOff, this));
+        this.add(new ToolButton("In", inImage, this));
+        this.add(new ToolButton("Out", outImage, this));
+        this.add(new ToolButton("", null, this));
+        this.add(new ToolButton("", null, this));
+        this.add(new ToolButton("", null, this));
+        this.add(new ToolButton("", null, this));
+        this.add(new ToolButton("", null, this));
+        this.add(new ToolButton("", null, this));
+        this.add(new ToolButton("", null, this));
+        this.add(new ToolButton("", null, this));
+        this.add(new ToolButton("", null, this));
+        this.add(new ToolButton("", null, this));
+        this.add(new ToolButton("", null, this));
+
+        toolSelected = false;
+        associatedGrid = grid;
     }
 
     @Override
@@ -78,4 +86,28 @@ public class Toolbar extends JPanel implements MouseListener, MouseMotionListene
     public void mouseWheelMoved(MouseWheelEvent e) {
 
     }
+
+    public String getToolHeld() {
+        return toolHeld;
+    }
+
+    public void toolButtonHelper(String s) {
+        if(!toolSelected) { //When no tool is selected...
+            toolSelected = true; //Now there is a tool selected
+            toolHeld = s; //Sets which tool is set
+        }
+        else if(toolHeld.equals(s)) { //If the current tool is click then no tool is selected
+            toolSelected = false;
+            toolHeld = "";
+        }
+        else {
+            toolHeld = s; //Switching from one tool to another
+        }
+        if(!s.equals("wire") || toolHeld.isEmpty()) {
+            associatedGrid.setFirstInput(null);
+        }
+    }
+
+
+
 }

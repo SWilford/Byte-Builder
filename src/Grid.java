@@ -4,6 +4,8 @@ import java.awt.event.*;
 import java.util.ArrayList;
 
 public class Grid extends JPanel implements MouseListener, MouseMotionListener, MouseWheelListener {
+
+    private BuilderGUI associatedGUI;
     private final SparseMatrix cells = new SparseMatrix(49, 49);
     public ArrayList<Wire> wires = new ArrayList<>(); // stores wires to be drawn
     private boolean mouseOverWire;
@@ -21,6 +23,8 @@ public class Grid extends JPanel implements MouseListener, MouseMotionListener, 
 
     private double x, y, scale;
 
+    private boolean middleClicking;
+
     //Image Icons
     private final ImageIcon gridSquareImg = new ImageIcon("Images/gridSquare.png");
     private final ImageIcon andImage = new ImageIcon("Images/AndGate.png");
@@ -34,7 +38,7 @@ public class Grid extends JPanel implements MouseListener, MouseMotionListener, 
     private final ImageIcon inImage = new ImageIcon("Images/Input.png");
     private final ImageIcon outImage = new ImageIcon("Images/Output.png");
 
-    public Grid() {
+    public Grid(BuilderGUI gui) {
 
         setLayout(new GridLayout(50, 50));
 
@@ -57,7 +61,12 @@ public class Grid extends JPanel implements MouseListener, MouseMotionListener, 
         mouseY = -1;
 
         this.setBackground(new Color(48,48, 48));
+        associatedGUI = gui;
+        middleClicking = false;
+    }
 
+    public void setFirstInput(Point p) {
+        firstInput = p;
     }
 
     public void display(Graphics g) {
@@ -143,17 +152,31 @@ public class Grid extends JPanel implements MouseListener, MouseMotionListener, 
 
     @Override
     public void mouseClicked(MouseEvent e) {
+        switch (associatedGUI.getToolHeld()) {
+            case "" -> {
 
+            }
+            case "Wire" -> {
+                System.out.println("w");
+            }
+            case "Not" -> {
+                System.out.println("n");
+            }
+        }
     }
 
     @Override
     public void mousePressed(MouseEvent e) {
-
+        if(e.getButton() == MouseEvent.BUTTON2) {
+            middleClicking = true;
+        }
     }
 
     @Override
     public void mouseReleased(MouseEvent e) {
-
+        if(e.getButton() == MouseEvent.BUTTON2) {
+            middleClicking = false;
+        }
     }
 
     @Override
@@ -170,15 +193,22 @@ public class Grid extends JPanel implements MouseListener, MouseMotionListener, 
 
     @Override
     public void mouseDragged(MouseEvent e) {
-
+        if(middleClicking) {
+            x += scale * (mouseX - e.getX());
+            mouseX = e.getX();
+            y += scale * (mouseY - e.getY());
+            mouseY = e.getY();
+            repaint();
+        }
     }
 
     @Override
     public void mouseMoved(MouseEvent e) {
-        System.out.println(toXCoord(e.getX()));
+
         mouseX = (int)Math.floor(toXCoord(e.getX())/cellWidth);
         mouseY = (int)Math.floor(toYCoord(e.getY())/cellWidth);
 
+        System.out.println("X: "+mouseX+ " Y: "+mouseY);
 
 
         repaint();
