@@ -6,7 +6,7 @@ import java.util.ArrayList;
 public class Grid extends JPanel implements MouseListener, MouseMotionListener, MouseWheelListener {
 
     private BuilderGUI associatedGUI;
-    private final SparseMatrix cells = new SparseMatrix(49, 49);
+    private final SparseMatrix<Operator> cells = new SparseMatrix<>();
     public ArrayList<Wire> wires = new ArrayList<>(); // stores wires to be drawn
     private boolean mouseOverWire;
     public String currentWireColor;
@@ -70,9 +70,6 @@ public class Grid extends JPanel implements MouseListener, MouseMotionListener, 
     }
 
     public void display(Graphics g) {
-        //Find box in top left, find box in bottom right
-        //draw everything between
-        //COMBINE EACH COMPONENT AND BUTTON
 
         int LeftX = (int)x/cellWidth;
         int LeftY = (int)y/cellWidth;
@@ -105,6 +102,14 @@ public class Grid extends JPanel implements MouseListener, MouseMotionListener, 
 
         for(int i = LeftY; i <= RightY; i++) {
             g.drawLine(0, toYPosOnWindow(i*cellWidth), myWidth, toYPosOnWindow(i*cellWidth));
+        }
+
+        for(Operator o: cells) {
+            if((o.col >= LeftX && o.row >= LeftY) && (o.col <= RightX && o.row <= RightY)) {
+                if(o instanceof NotBlock) {
+                    g.drawImage(notImage.getImage(), toXPosOnWindow(o.getCol() * cellWidth), toYPosOnWindow(o.getRow() * cellWidth), cellWidth, cellWidth, null);
+                }
+            }
         }
 
     }
@@ -152,17 +157,27 @@ public class Grid extends JPanel implements MouseListener, MouseMotionListener, 
 
     @Override
     public void mouseClicked(MouseEvent e) {
+
+        int col = (int)Math.floor(toXCoord(e.getX())/cellWidth);
+        int row = (int)Math.floor(toYCoord(e.getY())/cellWidth);
+
+
+
         switch (associatedGUI.getToolHeld()) {
             case "" -> {
 
             }
             case "Wire" -> {
-                System.out.println("w");
+
             }
             case "Not" -> {
-                System.out.println("n");
+                Operator notBlock = new NotBlock(row, col, null); //(row, col) = (y, x)  <---- !!!
+                cells.set(col, row, notBlock);
+
             }
         }
+
+        repaint();
     }
 
     @Override
