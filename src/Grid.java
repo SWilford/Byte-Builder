@@ -107,7 +107,25 @@ public class Grid extends JPanel implements MouseListener, MouseMotionListener, 
         for(Operator o: cells) {
             if((o.col >= LeftX && o.row >= LeftY) && (o.col <= RightX && o.row <= RightY)) {
                 if(o instanceof NotBlock) {
-                    g.drawImage(notImage.getImage(), toXPosOnWindow(o.getCol() * cellWidth), toYPosOnWindow(o.getRow() * cellWidth), cellWidth, cellWidth, null);
+                    g.drawImage(notImage.getImage(), toXPosOnWindow(o.getCol() * cellWidth), toYPosOnWindow(o.getRow() * cellWidth), toXPosOnWindow(cellWidth + x), toYPosOnWindow(cellWidth + y), null);
+                }
+                if(o instanceof AndBlock) {
+                    g.drawImage(andImage.getImage(), toXPosOnWindow(o.getCol() * cellWidth), toYPosOnWindow(o.getRow() * cellWidth), toXPosOnWindow(cellWidth + x), toYPosOnWindow(cellWidth + y), null);
+                }
+                if(o instanceof OnBlock) {
+                    g.drawImage(onImage.getImage(), toXPosOnWindow(o.getCol() * cellWidth), toYPosOnWindow(o.getRow() * cellWidth), toXPosOnWindow(cellWidth + x), toYPosOnWindow(cellWidth + y), null);
+                }
+                if(o instanceof Light) {
+                    g.drawImage(lightOff.getImage(), toXPosOnWindow(o.getCol() * cellWidth), toYPosOnWindow(o.getRow() * cellWidth), toXPosOnWindow(cellWidth + x), toYPosOnWindow(cellWidth + y), null);
+                }
+                if(o instanceof Switch) {
+                    g.drawImage(switchOff.getImage(), toXPosOnWindow(o.getCol() * cellWidth), toYPosOnWindow(o.getRow() * cellWidth), toXPosOnWindow(cellWidth + x), toYPosOnWindow(cellWidth + y), null);
+                }
+                if(o instanceof Input) {
+                    g.drawImage(inImage.getImage(), toXPosOnWindow(o.getCol() * cellWidth), toYPosOnWindow(o.getRow() * cellWidth), toXPosOnWindow(cellWidth + x), toYPosOnWindow(cellWidth + y), null);
+                }
+                if(o instanceof Output) {
+                    g.drawImage(outImage.getImage(), toXPosOnWindow(o.getCol() * cellWidth), toYPosOnWindow(o.getRow() * cellWidth), toXPosOnWindow(cellWidth + x), toYPosOnWindow(cellWidth + y), null);
                 }
             }
         }
@@ -161,29 +179,88 @@ public class Grid extends JPanel implements MouseListener, MouseMotionListener, 
         int col = (int)Math.floor(toXCoord(e.getX())/cellWidth);
         int row = (int)Math.floor(toYCoord(e.getY())/cellWidth);
 
-
-
         switch (associatedGUI.getToolHeld()) {
             case "" -> {
-
+                if(cells.get(col, row) instanceof Switch) {
+                    ((Switch)(cells.get(col, row))).switchInput();
+                }
             }
             case "Wire" -> {
+                if(cells.get(row, col) != null) {
+                    if(firstInput == null) {
+                        firstInput = new Point(row, col);
+                    }
+                    else {
+                        if(cells.get(row, col) instanceof OnBlock || cells.get(row, col) instanceof Switch || cells.get(row, col).isFull()) { //do nothing since start
+                            break;
+                        }
+                        if(cells.get(row, col) instanceof Custom) {
+                            Operator temp = ((Custom) (cells.get(row, col))).getFirstEmpty();
+                            if(temp != null) {
+                                temp.setPrev1(cells.get((int)firstInput.getX(), (int)firstInput.getY()));
+                            }
+                            else {
+                                break;
+                            }
+                        }
+                        else if (cells.get(row, col) instanceof Operator2I && cells.get(row, col).getPrev1() != null) {
 
+                        }
+                        else {
+
+                        }
+
+                        firstInput = null;
+                    }
+                }
             }
             case "Not" -> {
                 Operator notBlock = new NotBlock(row, col, null); //(row, col) = (y, x)  <---- !!!
                 cells.set(col, row, notBlock);
-
+            }
+            case "And" -> {
+                Operator andBlock = new AndBlock(row, col,null, null);
+                cells.set(col, row, andBlock);
+            }
+            case "Trash" -> {
+                deletePointersTo(cells.get(row, col));
+                cells.set(col, row, null);
+            }
+            case "On" -> {
+                Operator onBlock = new OnBlock(row, col);
+                cells.set(col, row, onBlock);
+            }
+            case "Light" -> {
+                Operator lt = new Light(row, col,null);
+                cells.set(col, row, lt);
+            }
+            case "Switch" -> {
+                Operator swi = new Switch(row, col);
+                cells.set(col, row, swi);
+            }
+            case "In" -> {
+                Operator inBlock = new Input(row, col);
+                cells.set(col, row, inBlock);
+            }
+            case "Out" -> {
+                Operator outBlock = new Output(row, col, null);
+                cells.set(col, row, outBlock);
             }
         }
 
         repaint();
     }
 
+    private void deletePointersTo(Operator n) {
+
+    }
+
     @Override
     public void mousePressed(MouseEvent e) {
         if(e.getButton() == MouseEvent.BUTTON2) {
             middleClicking = true;
+            mouseY = e.getY();
+            mouseX = e.getX();
         }
     }
 

@@ -1,6 +1,7 @@
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
+import java.util.ArrayList;
 
 public class Toolbar extends JPanel implements MouseListener, MouseMotionListener, MouseWheelListener {
 
@@ -19,38 +20,52 @@ public class Toolbar extends JPanel implements MouseListener, MouseMotionListene
 
     private Grid associatedGrid;
 
+    private ArrayList<ToolButton> buttons = new ArrayList<>();
+
     public Toolbar(Grid grid) {
+
+        buttons.add(new ToolButton("Wire", wireToolImg, this));
+        buttons.add(new ToolButton("And", andImage, this));
+        buttons.add(new ToolButton("Not", notImage, this));
+        buttons.add(new ToolButton("Trash", trashImage, this));
+        buttons.add(new ToolButton("On", onImage, this));
+        buttons.add(new ToolButton("Light", lightOn, this));
+        buttons.add(new ToolButton("Switch", switchOff, this));
+        buttons.add(new ToolButton("In", inImage, this));
+        buttons.add(new ToolButton("Out", outImage, this));
+        buttons.add(new ToolButton("", null, this));
+        buttons.add(new ToolButton("", null, this));
+        buttons.add(new ToolButton("", null, this));
+        buttons.add(new ToolButton("", null, this));
+        buttons.add(new ToolButton("", null, this));
+        buttons.add(new ToolButton("", null, this));
+        buttons.add(new ToolButton("", null, this));
+        buttons.add(new ToolButton("", null, this));
+        buttons.add(new ToolButton("", null, this));
+        buttons.add(new ToolButton("", null, this));
+        buttons.add(new ToolButton("", null, this));
+
         setLayout(new GridLayout(0, 2, 0, 0));
         this.setBackground(new Color(48, 48, 48));
-        this.add(new ToolButton("Wire", wireToolImg, this));
-        this.add(new ToolButton("And", andImage, this));
-        this.add(new ToolButton("Not", notImage, this));
-        this.add(new ToolButton("Trash", trashImage, this));
-        this.add(new ToolButton("On", onImage, this));
-        this.add(new ToolButton("Light", lightOn, this));
-        this.add(new ToolButton("Switch", switchOff, this));
-        this.add(new ToolButton("In", inImage, this));
-        this.add(new ToolButton("Out", outImage, this));
-        this.add(new ToolButton("", null, this));
-        this.add(new ToolButton("", null, this));
-        this.add(new ToolButton("", null, this));
-        this.add(new ToolButton("", null, this));
-        this.add(new ToolButton("", null, this));
-        this.add(new ToolButton("", null, this));
-        this.add(new ToolButton("", null, this));
-        this.add(new ToolButton("", null, this));
-        this.add(new ToolButton("", null, this));
-        this.add(new ToolButton("", null, this));
-        this.add(new ToolButton("", null, this));
+
+        for(ToolButton t : buttons) {
+            this.add(t);
+        }
 
         toolSelected = false;
         associatedGrid = grid;
+
+    }
+
+    public ArrayList<ToolButton> getButtons() {
+        return buttons;
     }
 
     @Override
     public void mouseClicked(MouseEvent e) {
-
     }
+
+
 
     @Override
     public void mousePressed(MouseEvent e) {

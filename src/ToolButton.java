@@ -7,8 +7,10 @@ public class ToolButton extends JPanel implements MouseListener {
     private final String title; //Title for the button
     private final ImageIcon image; //Stores the base image
     private Color color;
-    private final Color baseColor;
+    private Color baseColor;
     private final Color highlightColor; //Colors of the button
+    private boolean toolbarColored; //Has the button been colored with toolbarHighlightColor?
+    private final Color toolbarHighlightColor = new Color(75, 75, 75); //Color for when tool is selected
 
     private Toolbar containingToolbar;
 
@@ -25,14 +27,35 @@ public class ToolButton extends JPanel implements MouseListener {
         this.addMouseListener(this);
     }
 
-    public void highlight() {
-        color = highlightColor;
+    public void toolbarHighlight() {
+        baseColor = toolbarHighlightColor;
+        color = baseColor;
+        toolbarColored = true;
+        repaint();
+    }
+    public void resetToolbarColor() {
+        baseColor = new Color(48, 48, 48);
+        color = baseColor;
+        toolbarColored = false;
         repaint();
     }
 
-    public void unHighlight() {
-        color = baseColor;
+    public boolean isToolbarColored() {
+        return toolbarColored;
+    }
+
+    public void highlight() {
+        if(!title.equals("")) {
+        color = highlightColor;
         repaint();
+        }
+    }
+
+    public void unHighlight() {
+        if(!title.equals("")) {
+            color = baseColor;
+            repaint();
+        }
     }
 
     public String getTitle() {
@@ -46,16 +69,28 @@ public class ToolButton extends JPanel implements MouseListener {
         if(image!=null) {
             g.drawImage(image.getImage(), 0,0, super.getWidth(), this.getHeight(), null);
         }
+
     }
 
     @Override
     public void mouseClicked(MouseEvent e) {
         containingToolbar.toolButtonHelper(title);
-        if(containingToolbar.getToolHeld().isEmpty()) {
+        if (containingToolbar.getToolHeld().isEmpty()) {
             System.out.println("Tool Unselected");
+            color = baseColor;
+        } else {
+            System.out.println("Tool Selected: " + containingToolbar.getToolHeld());
+            color = toolbarHighlightColor;
         }
-        else {
-            System.out.println("Tool Selected: "+containingToolbar.getToolHeld());
+
+        for (ToolButton b : containingToolbar.getButtons()) {
+            if (!b.title.isEmpty()) {
+                if (containingToolbar.getToolHeld().equals(b.getTitle()) && !b.isToolbarColored()) { //when a tool is selected primary color becomes the selection color
+                    b.toolbarHighlight();
+                } else if (b.isToolbarColored() && !containingToolbar.getToolHeld().equals(b.getTitle())) { //when a tool is not selected the primary color becomes base color
+                    b.resetToolbarColor();
+                }
+            }
         }
     }
 
