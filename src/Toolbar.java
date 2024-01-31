@@ -22,6 +22,8 @@ public class Toolbar extends JPanel implements MouseListener, MouseMotionListene
 
     private ArrayList<ToolButton> buttons = new ArrayList<>();
 
+    private String currentWireColor;
+
     public Toolbar(Grid grid) {
 
         buttons.add(new ToolButton("Wire", wireToolImg, this));
@@ -54,6 +56,8 @@ public class Toolbar extends JPanel implements MouseListener, MouseMotionListene
 
         toolSelected = false;
         associatedGrid = grid;
+
+        currentWireColor = grid.getAssociatedGUI().getCurrentWireColor();
 
     }
 
@@ -107,22 +111,17 @@ public class Toolbar extends JPanel implements MouseListener, MouseMotionListene
     }
 
     public void toolButtonHelper(String s) {
-        if(!toolSelected) { //When no tool is selected...
+        if (!toolSelected) { //When no tool is selected...
             toolSelected = true; //Now there is a tool selected
             toolHeld = s; //Sets which tool is set
-        }
-        else if(toolHeld.equals(s)) { //If the current tool is click then no tool is selected
+        } else if (toolHeld.equals(s)) { //If the current tool is click then no tool is selected
             toolSelected = false;
             toolHeld = "";
-        }
-        else {
+        } else {
             toolHeld = s; //Switching from one tool to another
         }
-        if(!s.equals("wire") || toolHeld.isEmpty()) {
+        if (!s.equals("wire") || toolHeld.isEmpty()) {
             associatedGrid.setFirstInput(null);
         }
     }
-
-
-
 }

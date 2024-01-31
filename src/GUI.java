@@ -141,7 +141,7 @@ public class GUI extends JPanel implements MouseListener, MouseMotionListener, M
             }
             else {
                 //g2.drawLine(w.getX1(), w.getY1(), w.getX2(), w.getY2());
-                w.drawWire(g2);
+                //w.drawWire(g2);
                 g2.setColor(w.getClr());
                 drawTriangle(g2,w.getX1(), w.getY1(), w.getX2(), w.getY2());
             }

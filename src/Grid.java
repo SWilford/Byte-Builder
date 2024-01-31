@@ -19,7 +19,7 @@ public class Grid extends JPanel implements MouseListener, MouseMotionListener, 
     private int mouseY; //Y position of cursor
     private static Point firstInput; //variable for first component clicked for 2, used for making wiring
 
-    private int cellWidth = 50;
+    private int cellWidth = 50; //width of imaginary coordinates
 
     private double x, y, scale;
 
@@ -38,6 +38,10 @@ public class Grid extends JPanel implements MouseListener, MouseMotionListener, 
     private final ImageIcon inImage = new ImageIcon("Images/Input.png");
     private final ImageIcon outImage = new ImageIcon("Images/Output.png");
 
+    public BuilderGUI getAssociatedGUI() {
+        return associatedGUI;
+    }
+
     public Grid(BuilderGUI gui) {
 
         setLayout(new GridLayout(50, 50));
@@ -49,7 +53,6 @@ public class Grid extends JPanel implements MouseListener, MouseMotionListener, 
         mouseY = 0;
         firstInput = null;
         wireToCursor = null;
-        currentWireColor = "red";
         selectedWire = -1;
         wireIsSelected = false;
         mouseOverWire = false;
@@ -63,6 +66,8 @@ public class Grid extends JPanel implements MouseListener, MouseMotionListener, 
         this.setBackground(new Color(48,48, 48));
         associatedGUI = gui;
         middleClicking = false;
+
+        currentWireColor = associatedGUI.getCurrentWireColor();
     }
 
     public void setFirstInput(Point p) {
@@ -130,6 +135,10 @@ public class Grid extends JPanel implements MouseListener, MouseMotionListener, 
             }
         }
 
+        for(Wire w : wires) {
+            w.drawWire(g, this, cells);
+        }
+
     }
 
     @Override
@@ -159,19 +168,19 @@ public class Grid extends JPanel implements MouseListener, MouseMotionListener, 
 
     private double toXCoord(double x) { //Thanks to BH for the code!!!
         return x * scale + this.x;
-    }
+    } //Mouse coord into sparse matrix coord
 
-    private int toXPosOnWindow(double x) {//Thanks to BH for the code!!!
+    public int toXPosOnWindow(double x) {//Thanks to BH for the code!!!
         return (int) Math.round((x - this.x) / scale);
-    }
+    } //Sparse matrix coord to mouse coord
 
     private double toYCoord(double y) {//Thanks to BH for the code!!!
         return y * scale + this.y;
-    }
+    } //Mouse coord into sparse matrix coord
 
-    private int toYPosOnWindow(double y) {//Thanks to BH for the code!!!
+    public int toYPosOnWindow(double y) {//Thanks to BH for the code!!!
         return (int) Math.round((y - this.y) / scale);
-    }
+    }  //Sparse matrix coord to mouse coord
 
     @Override
     public void mouseClicked(MouseEvent e) {
@@ -186,16 +195,16 @@ public class Grid extends JPanel implements MouseListener, MouseMotionListener, 
                 }
             }
             case "Wire" -> {
-                if(cells.get(row, col) != null) {
+                if(cells.get(col, row) != null) {
                     if(firstInput == null) {
-                        firstInput = new Point(row, col);
+                        firstInput = new Point(col, row);
                     }
                     else {
-                        if(cells.get(row, col) instanceof OnBlock || cells.get(row, col) instanceof Switch || cells.get(row, col).isFull()) { //do nothing since start
+                        if(cells.get(col, row) instanceof OnBlock || cells.get(col, row) instanceof Switch || cells.get(col, row).isFull()) { //do nothing since start
                             break;
                         }
-                        if(cells.get(row, col) instanceof Custom) {
-                            Operator temp = ((Custom) (cells.get(row, col))).getFirstEmpty();
+                        if(cells.get(col, row) instanceof Custom) {
+                            Operator temp = ((Custom) (cells.get(col, row))).getFirstEmpty();
                             if(temp != null) {
                                 temp.setPrev1(cells.get((int)firstInput.getX(), (int)firstInput.getY()));
                             }
@@ -203,13 +212,15 @@ public class Grid extends JPanel implements MouseListener, MouseMotionListener, 
                                 break;
                             }
                         }
-                        else if (cells.get(row, col) instanceof Operator2I && cells.get(row, col).getPrev1() != null) {
-
+                        else if (cells.get(col, row) instanceof Operator2I && cells.get(col, row).getPrev1() != null) { //if it has two inputs and the first is taken
+                            ((Operator2I)cells.get(col, row)).setPrev2(cells.get((int)firstInput.getX(), (int)(firstInput.getY()))); //Go to the second slot
+                            ((Operator2I)cells.get(col, row)).setColor2(currentWireColor);
                         }
-                        else {
-
+                        else { //first slot
+                            cells.get(col, row).setPrev1(cells.get((int)firstInput.getX(), (int)(firstInput.getY()))); //set 2nd operator's previous to 1st operator
+                            cells.get(col, row).setColor(currentWireColor);
                         }
-
+                        createWire((int)firstInput.getX(), (int)firstInput.getY(), col, row);
                         firstInput = null;
                     }
                 }
@@ -255,6 +266,18 @@ public class Grid extends JPanel implements MouseListener, MouseMotionListener, 
 
     }
 
+    private void createWire(int c1, int r1, int c2, int r2) {
+        wires.add(new Wire(c1, r1, c2, r2, currentWireColor));
+    }
+
+    public int getCellWidth() {
+        return cellWidth;
+    }
+
+    public SparseMatrix<Operator> getCells() {
+        return cells;
+    }
+
     @Override
     public void mousePressed(MouseEvent e) {
         if(e.getButton() == MouseEvent.BUTTON2) {
@@ -294,6 +317,10 @@ public class Grid extends JPanel implements MouseListener, MouseMotionListener, 
         }
     }
 
+    public int getEks() {
+        return (int)x;
+    }
+
     @Override
     public void mouseMoved(MouseEvent e) {
 
@@ -319,5 +346,6 @@ public class Grid extends JPanel implements MouseListener, MouseMotionListener, 
         scaleFactor = Math.pow(scaleFactor, Math.copySign(1, amount));
         zoom(scaleFactor, e.getX(), e.getY());
         System.out.println(scale);
+
     }
 }

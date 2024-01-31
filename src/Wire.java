@@ -53,7 +53,6 @@ public class Wire {
 
         wireColored = false;
         mouseCovering = false;
-
     }
 
     public int getX1() {
@@ -148,15 +147,16 @@ public class Wire {
         wireColored = true;
     }
 
-    public void drawWire(Graphics g) {
+    public void drawWire(Graphics g, Grid grid, SparseMatrix<Operator> cells) {
         Graphics2D g2 = (Graphics2D)g;
         Stroke wireStroke;
-        if(mouseCovering) {
+        /*if(mouseCovering) {
             wireStroke = new BasicStroke(5);
         }
         else {
             wireStroke = new BasicStroke(3);
-        }
+        }*/
+        wireStroke = new BasicStroke(3);
 
         g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
@@ -168,7 +168,27 @@ public class Wire {
         }
         g2.setStroke(wireStroke);
         g2.setColor(clr);
-        g2.drawLine(x1, y1, x2, y2);
+
+        int cellWidth = grid.getCellWidth();
+        int max = (int)grid.toXPosOnWindow(cellWidth + grid.getEks());
+
+        int xOne = 0;
+        int xTwo = grid.toXPosOnWindow(x2 * cellWidth)+max/5;
+        int yOne = 0;
+        int yTwo = grid.toYPosOnWindow(y2 * cellWidth)+max/2;
+
+        if(!(cells.get(x1, y2) instanceof Operator2I)) {
+            xOne = grid.toXPosOnWindow(x1 * cellWidth)+(max/5*4);
+            yOne = grid.toYPosOnWindow(y1 * cellWidth)+max/2;
+        }
+        else {//else if Operator 2I
+            //put it in the open one if Operator2I
+        }
+        //else if Custom, find the amount of inputs and put it in the first open one
+
+        //eventually will need to have outputs (editing xTwo and yTwo) if blocks have multiple outputs
+
+        g2.drawLine(xOne, yOne, xTwo, yTwo);
     }
 
     public boolean contains(int x, int y) {

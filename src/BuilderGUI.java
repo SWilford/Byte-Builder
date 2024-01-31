@@ -6,8 +6,11 @@ public class BuilderGUI extends JPanel implements MouseListener, MouseMotionList
 
     Toolbar toolbar;
 
+    String currentWireColor;
+
     public BuilderGUI() {
         setLayout(new BorderLayout(0, 0));
+        currentWireColor = "red";
         Grid grid = new Grid(this);
         toolbar = new Toolbar(grid);
         this.add(grid, BorderLayout.CENTER);
@@ -20,6 +23,14 @@ public class BuilderGUI extends JPanel implements MouseListener, MouseMotionList
 
     public String getToolHeld() {
         return toolbar.getToolHeld();
+    }
+
+    public String getCurrentWireColor() {
+        return currentWireColor;
+    }
+
+    public void setCurrentWireColor(String s) {
+        currentWireColor = s;
     }
 
     @Override
