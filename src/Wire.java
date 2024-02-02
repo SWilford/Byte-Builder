@@ -147,6 +147,18 @@ public class Wire {
         wireColored = true;
     }
 
+    public void drawWire(Graphics g, Grid grid) {
+        Graphics2D g2 = (Graphics2D)g;
+        Stroke wireStroke;
+        wireStroke = new BasicStroke(3);
+        g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+        g2.setStroke(wireStroke);
+        g2.setColor(clr);
+        int cellWidth = grid.getCellWidth();
+        int max = grid.toXPosOnWindow(cellWidth + grid.getEks());
+        g2.drawLine(grid.toXPosOnWindow(x1 * cellWidth)+(max/5*4), grid.toYPosOnWindow(y1 * cellWidth)+max/2, x2, y2);
+    }
+
     public void drawWire(Graphics g, Grid grid, SparseMatrix<Operator> cells) {
         Graphics2D g2 = (Graphics2D)g;
         Stroke wireStroke;
@@ -170,23 +182,26 @@ public class Wire {
         g2.setColor(clr);
 
         int cellWidth = grid.getCellWidth();
-        int max = (int)grid.toXPosOnWindow(cellWidth + grid.getEks());
+        int max = grid.toXPosOnWindow(cellWidth + grid.getEks());
 
-        int xOne = 0;
+        int xOne = grid.toXPosOnWindow(x1 * cellWidth)+(max/5*4);
         int xTwo = grid.toXPosOnWindow(x2 * cellWidth)+max/5;
-        int yOne = 0;
+        int yOne = grid.toYPosOnWindow(y1 * cellWidth)+max/2;
         int yTwo = grid.toYPosOnWindow(y2 * cellWidth)+max/2;
 
-        if(!(cells.get(x1, y2) instanceof Operator2I)) {
-            xOne = grid.toXPosOnWindow(x1 * cellWidth)+(max/5*4);
-            yOne = grid.toYPosOnWindow(y1 * cellWidth)+max/2;
+        if(cells.get(x2, y2) instanceof Operator2I) {
+            if((cells.get(x2, y2).getPrev1() == cells.get(x1, y1))) { //First input
+                yTwo = grid.toYPosOnWindow(y2* cellWidth)+(max/3);
+            }
+            else { //Second input
+                yTwo = grid.toYPosOnWindow(y2* cellWidth)+(max/3*2);
+            }
         }
-        else {//else if Operator 2I
-            //put it in the open one if Operator2I
+        else if(cells.get(x1, y1) instanceof Custom) {
+            //else if Custom, find the amount of inputs and put it in the first open one
         }
-        //else if Custom, find the amount of inputs and put it in the first open one
 
-        //eventually will need to have outputs (editing xTwo and yTwo) if blocks have multiple outputs
+        //eventually will need to have outputs if blocks have multiple outputs
 
         g2.drawLine(xOne, yOne, xTwo, yTwo);
     }

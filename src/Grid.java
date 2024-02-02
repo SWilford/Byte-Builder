@@ -15,8 +15,11 @@ public class Grid extends JPanel implements MouseListener, MouseMotionListener, 
     private boolean wireIsSelected;
     public ArrayList<Button> wireColors = new ArrayList<>();
     public Wire wireToCursor; //The wire being generated when wire tool is selected
-    private int mouseX; //X position of cursor
-    private int mouseY; //Y position of cursor
+    private int mouseX; //X position of cursor COLUMN
+    private int mouseY; //Y position of cursor ROW
+
+    private int cursorX; //X position of cursor in pixel space
+    private int cursorY; //Y position of cursor in pixel space
     private static Point firstInput; //variable for first component clicked for 2, used for making wiring
 
     private int cellWidth = 50; //width of imaginary coordinates
@@ -26,10 +29,8 @@ public class Grid extends JPanel implements MouseListener, MouseMotionListener, 
     private boolean middleClicking;
 
     //Image Icons
-    private final ImageIcon gridSquareImg = new ImageIcon("Images/gridSquare.png");
     private final ImageIcon andImage = new ImageIcon("Images/AndGate.png");
     private final ImageIcon notImage = new ImageIcon("Images/NotGate.png");
-    private final ImageIcon trashImage = new ImageIcon("Images/Trash.png");
     private final ImageIcon onImage = new ImageIcon("Images/On.png");
     private final ImageIcon lightOn = new ImageIcon("Images/LightOn.png");
     private final ImageIcon lightOff = new ImageIcon("Images/LightOff.png");
@@ -121,10 +122,20 @@ public class Grid extends JPanel implements MouseListener, MouseMotionListener, 
                     g.drawImage(onImage.getImage(), toXPosOnWindow(o.getCol() * cellWidth), toYPosOnWindow(o.getRow() * cellWidth), toXPosOnWindow(cellWidth + x), toYPosOnWindow(cellWidth + y), null);
                 }
                 if(o instanceof Light) {
-                    g.drawImage(lightOff.getImage(), toXPosOnWindow(o.getCol() * cellWidth), toYPosOnWindow(o.getRow() * cellWidth), toXPosOnWindow(cellWidth + x), toYPosOnWindow(cellWidth + y), null);
+                    if(o.getPrev1() != null && o.getOutput()) {
+                        g.drawImage(lightOn.getImage(), toXPosOnWindow(o.getCol() * cellWidth), toYPosOnWindow(o.getRow() * cellWidth), toXPosOnWindow(cellWidth + x), toYPosOnWindow(cellWidth + y), null);
+                    }
+                    else {
+                        g.drawImage(lightOff.getImage(), toXPosOnWindow(o.getCol() * cellWidth), toYPosOnWindow(o.getRow() * cellWidth), toXPosOnWindow(cellWidth + x), toYPosOnWindow(cellWidth + y), null);
+                    }
                 }
                 if(o instanceof Switch) {
-                    g.drawImage(switchOff.getImage(), toXPosOnWindow(o.getCol() * cellWidth), toYPosOnWindow(o.getRow() * cellWidth), toXPosOnWindow(cellWidth + x), toYPosOnWindow(cellWidth + y), null);
+                    if(o.getOutput()) {
+                        g.drawImage(switchOn.getImage(), toXPosOnWindow(o.getCol() * cellWidth), toYPosOnWindow(o.getRow() * cellWidth), toXPosOnWindow(cellWidth + x), toYPosOnWindow(cellWidth + y), null);
+                    }
+                    else {
+                        g.drawImage(switchOff.getImage(), toXPosOnWindow(o.getCol() * cellWidth), toYPosOnWindow(o.getRow() * cellWidth), toXPosOnWindow(cellWidth + x), toYPosOnWindow(cellWidth + y), null);
+                    }
                 }
                 if(o instanceof Input) {
                     g.drawImage(inImage.getImage(), toXPosOnWindow(o.getCol() * cellWidth), toYPosOnWindow(o.getRow() * cellWidth), toXPosOnWindow(cellWidth + x), toYPosOnWindow(cellWidth + y), null);
@@ -137,6 +148,10 @@ public class Grid extends JPanel implements MouseListener, MouseMotionListener, 
 
         for(Wire w : wires) {
             w.drawWire(g, this, cells);
+        }
+
+        if(wireToCursor != null) {
+            wireToCursor.drawWire(g, this);
         }
 
     }
@@ -222,6 +237,7 @@ public class Grid extends JPanel implements MouseListener, MouseMotionListener, 
                         }
                         createWire((int)firstInput.getX(), (int)firstInput.getY(), col, row);
                         firstInput = null;
+                        updateWireToCursor();
                     }
                 }
             }
@@ -274,10 +290,6 @@ public class Grid extends JPanel implements MouseListener, MouseMotionListener, 
         return cellWidth;
     }
 
-    public SparseMatrix<Operator> getCells() {
-        return cells;
-    }
-
     @Override
     public void mousePressed(MouseEvent e) {
         if(e.getButton() == MouseEvent.BUTTON2) {
@@ -324,13 +336,26 @@ public class Grid extends JPanel implements MouseListener, MouseMotionListener, 
     @Override
     public void mouseMoved(MouseEvent e) {
 
+        cursorX = e.getX();
+        cursorY = e.getY();
+
         mouseX = (int)Math.floor(toXCoord(e.getX())/cellWidth);
         mouseY = (int)Math.floor(toYCoord(e.getY())/cellWidth);
 
+        updateWireToCursor();
+
         System.out.println("X: "+mouseX+ " Y: "+mouseY);
 
-
         repaint();
+    }
+
+    private void updateWireToCursor() {
+        if(firstInput != null) { //draws wire to cursor
+            wireToCursor = new Wire((int)firstInput.getX(), (int)firstInput.getY(), cursorX, cursorY, currentWireColor);
+        }
+        else {
+            wireToCursor = null;
+        }
     }
 
     @Override

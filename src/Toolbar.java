@@ -27,9 +27,9 @@ public class Toolbar extends JPanel implements MouseListener, MouseMotionListene
     public Toolbar(Grid grid) {
 
         buttons.add(new ToolButton("Wire", wireToolImg, this));
-        buttons.add(new ToolButton("And", andImage, this));
-        buttons.add(new ToolButton("Not", notImage, this));
         buttons.add(new ToolButton("Trash", trashImage, this));
+        buttons.add(new ToolButton("Not", notImage, this));
+        buttons.add(new ToolButton("And", andImage, this));
         buttons.add(new ToolButton("On", onImage, this));
         buttons.add(new ToolButton("Light", lightOn, this));
         buttons.add(new ToolButton("Switch", switchOff, this));
