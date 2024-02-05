@@ -111,7 +111,7 @@ public class Grid extends JPanel implements MouseListener, MouseMotionListener, 
         }
 
         for(Operator o: cells) {
-            if((o.col >= LeftX && o.row >= LeftY) && (o.col <= RightX && o.row <= RightY)) {
+            if(o != null && (o.col >= LeftX && o.row >= LeftY) && (o.col <= RightX && o.row <= RightY)) {
                 if(o instanceof NotBlock) {
                     g.drawImage(notImage.getImage(), toXPosOnWindow(o.getCol() * cellWidth), toYPosOnWindow(o.getRow() * cellWidth), toXPosOnWindow(cellWidth + x), toYPosOnWindow(cellWidth + y), null);
                 }
@@ -146,9 +146,20 @@ public class Grid extends JPanel implements MouseListener, MouseMotionListener, 
             }
         }
 
+        ArrayList<Wire> wiresDelete = new ArrayList<>();
+
         for(Wire w : wires) {
-            w.drawWire(g, this, cells);
+            if(cells.get(w.getX1(), w.getY1()) == null || cells.get(w.getX2(), w.getY2()) == null) {
+                wiresDelete.add(w);
+            }
+            else {
+                w.drawWire(g, this, cells);
+            }
         }
+        for(Wire w : wiresDelete) {
+            wires.remove(w);
+        }
+
 
         if(wireToCursor != null) {
             wireToCursor.drawWire(g, this);
@@ -250,8 +261,10 @@ public class Grid extends JPanel implements MouseListener, MouseMotionListener, 
                 cells.set(col, row, andBlock);
             }
             case "Trash" -> {
-                deletePointersTo(cells.get(row, col));
-                cells.set(col, row, null);
+                if(cells.get(col, row) != null) {
+                    deletePointersTo(cells.get(col, row));
+                    cells.set(col, row, null);
+                }
             }
             case "On" -> {
                 Operator onBlock = new OnBlock(row, col);
@@ -279,7 +292,22 @@ public class Grid extends JPanel implements MouseListener, MouseMotionListener, 
     }
 
     private void deletePointersTo(Operator n) {
-
+        for(Operator temp1 : cells) {
+            if (temp1 instanceof Custom) {
+                for (Operator temp : (((Custom) temp1).getInputs())) {
+                    if (temp.getPrev1() == n) {
+                        temp.setPrev1(null);
+                    }
+                }
+            } else {
+                if (temp1.getPrev1() == n) {
+                    temp1.setPrev1(null);
+                }
+                if (temp1 instanceof Operator2I && ((Operator2I) temp1).getPrev2() == n) {
+                    ((Operator2I) temp1).setPrev2(null);
+                }
+            }
+        }
     }
 
     private void createWire(int c1, int r1, int c2, int r2) {
