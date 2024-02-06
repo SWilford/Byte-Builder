@@ -124,4 +124,28 @@ public class Toolbar extends JPanel implements MouseListener, MouseMotionListene
             associatedGrid.setFirstInput(null);
         }
     }
+
+    public void processUserInput(int k){ //k is key input from kb
+
+        switch (k){
+            case KeyEvent.VK_ESCAPE -> {
+                if (associatedGrid.getFirstInput() != null){
+                    associatedGrid.setFirstInput(null);
+                }
+            }
+            case KeyEvent.VK_1 -> buttons.get(0).pseudoMouseClicked("Wire");
+            case KeyEvent.VK_2 -> buttons.get(1).pseudoMouseClicked("Trash");
+            case KeyEvent.VK_3 -> buttons.get(2).pseudoMouseClicked("Not");
+            case KeyEvent.VK_4 -> buttons.get(3).pseudoMouseClicked("And");
+            case KeyEvent.VK_5 -> buttons.get(4).pseudoMouseClicked("On");
+            case KeyEvent.VK_6 -> buttons.get(5).pseudoMouseClicked("Light");
+            case KeyEvent.VK_7 -> buttons.get(6).pseudoMouseClicked("Switch");
+            case KeyEvent.VK_8 -> buttons.get(7).pseudoMouseClicked("In");
+            case KeyEvent.VK_9 -> buttons.get(8).pseudoMouseClicked("Out");
+
+
+
+        }
+    }
+
 }

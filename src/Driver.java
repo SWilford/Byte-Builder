@@ -21,7 +21,7 @@ public class Driver {
     public static class listen implements KeyListener{ //keyboard stuff
         public void keyTyped(KeyEvent e){}
         public void keyPressed(KeyEvent e){
-            //screen.processUserInput(e.getKeyCode());
+            screen.toolbar.processUserInput(e.getKeyCode());
         }
         public void keyReleased(KeyEvent e){
 

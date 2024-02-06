@@ -2,7 +2,11 @@ import java.awt.*;
 import java.awt.geom.Line2D;
 
 public class Wire {
-    private final int x1, y1, x2, y2;
+    private int x1;
+    private int y1;
+    private final int x2;
+    private final int y2;
+    private int xOne, yOne, xTwo, yTwo;
     private String color;
 
     public boolean selected;
@@ -19,6 +23,10 @@ public class Wire {
         y1 = b;
         x2 = c;
         y2 = d;
+        xOne = a;
+        yOne = b;
+        xTwo = c;
+        yTwo = d;
         color = cl;
         baseColor = this.getColor();
         clr = baseColor;
@@ -156,38 +164,32 @@ public class Wire {
         g2.setColor(clr);
         int cellWidth = grid.getCellWidth();
         int max = grid.toXPosOnWindow(cellWidth + grid.getEks());
-        g2.drawLine(grid.toXPosOnWindow(x1 * cellWidth)+(max/5*4), grid.toYPosOnWindow(y1 * cellWidth)+max/2, x2, y2);
+        x1 = grid.toXPosOnWindow(x1 * cellWidth)+(max/5*4);
+        y1 = grid.toYPosOnWindow(y1 * cellWidth)+max/2;
+        g2.drawLine(x1, y1, x2, y2);
     }
 
     public void drawWire(Graphics g, Grid grid, SparseMatrix<Operator> cells) {
         Graphics2D g2 = (Graphics2D)g;
         Stroke wireStroke;
-        /*if(mouseCovering) {
+        if(mouseCovering) {
             wireStroke = new BasicStroke(5);
         }
         else {
             wireStroke = new BasicStroke(3);
-        }*/
-        wireStroke = new BasicStroke(3);
+        }
+        //wireStroke = new BasicStroke(3);
 
         g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
-        if(selected) {
-            Stroke selectedStroke = new BasicStroke(10);
-            g2.setColor(Color.BLACK);
-            g2.setStroke(selectedStroke);
-            g2.drawLine(x1, y1, x2, y2);
-        }
-        g2.setStroke(wireStroke);
-        g2.setColor(clr);
 
         int cellWidth = grid.getCellWidth();
         int max = grid.toXPosOnWindow(cellWidth + grid.getEks());
 
-        int xOne = grid.toXPosOnWindow(x1 * cellWidth)+(max/5*4);
-        int xTwo = grid.toXPosOnWindow(x2 * cellWidth)+max/5;
-        int yOne = grid.toYPosOnWindow(y1 * cellWidth)+max/2;
-        int yTwo = grid.toYPosOnWindow(y2 * cellWidth)+max/2;
+        xOne = grid.toXPosOnWindow(x1 * cellWidth)+(max/5*4);
+        xTwo = grid.toXPosOnWindow(x2 * cellWidth)+max/5;
+        yOne = grid.toYPosOnWindow(y1 * cellWidth)+max/2;
+        yTwo = grid.toYPosOnWindow(y2 * cellWidth)+max/2;
 
         if(cells.get(x2, y2) instanceof Operator2I) {
             if((cells.get(x2, y2).getPrev1() == cells.get(x1, y1))) { //First input
@@ -202,16 +204,36 @@ public class Wire {
         }
 
         //eventually will need to have outputs if blocks have multiple outputs
-
+        if(selected) {
+            Stroke selectedStroke = new BasicStroke(10);
+            g2.setColor(Color.BLACK);
+            g2.setStroke(selectedStroke);
+            g2.drawLine(xOne, yOne, xTwo, yTwo);
+        }
+        g2.setStroke(wireStroke);
+        g2.setColor(clr);
         g2.drawLine(xOne, yOne, xTwo, yTwo);
+
+    }
+
+    public int getxOne() {
+        return xOne;
+    }
+
+    public int getyOne() {
+        return yOne;
+    }
+
+    public int getxTwo() {
+        return xTwo;
+    }
+
+    public int getyTwo() {
+        return yTwo;
     }
 
     public boolean contains(int x, int y) {
-        return Line2D.ptSegDist(x1, y1, x2, y2, x, y) < 7;
-    }
-
-    public boolean isMouseCovering() {
-        return mouseCovering;
+        return Line2D.ptSegDist(xOne, yOne, xTwo, yTwo, x, y) < 7;
     }
 
     public void setMouseCovering(Boolean b) {

@@ -75,22 +75,26 @@ public class ToolButton extends JPanel implements MouseListener {
     @Override
     public void mouseClicked(MouseEvent e) {
         if(e.getButton() == MouseEvent.BUTTON1) {
-            containingToolbar.toolButtonHelper(title);
-            if (containingToolbar.getToolHeld().isEmpty()) {
-                System.out.println("Tool Unselected");
-                color = baseColor;
-            } else {
-                System.out.println("Tool Selected: " + containingToolbar.getToolHeld());
-                color = toolbarHighlightColor;
-            }
+            pseudoMouseClicked(title);
+        }
+    }
 
-            for (ToolButton b : containingToolbar.getButtons()) {
-                if (!b.title.isEmpty()) {
-                    if (containingToolbar.getToolHeld().equals(b.getTitle()) && !b.isToolbarColored()) { //when a tool is selected primary color becomes the selection color
-                        b.toolbarHighlight();
-                    } else if (b.isToolbarColored() && !containingToolbar.getToolHeld().equals(b.getTitle())) { //when a tool is not selected the primary color becomes base color
-                        b.resetToolbarColor();
-                    }
+    public void pseudoMouseClicked(String t) {
+        containingToolbar.toolButtonHelper(t);
+        if (containingToolbar.getToolHeld().isEmpty()) {
+            System.out.println("Tool Unselected");
+            color = baseColor;
+        } else {
+            System.out.println("Tool Selected: " + containingToolbar.getToolHeld());
+            color = toolbarHighlightColor;
+        }
+
+        for (ToolButton b : containingToolbar.getButtons()) {
+            if (!b.title.isEmpty()) {
+                if (containingToolbar.getToolHeld().equals(b.getTitle()) && !b.isToolbarColored()) { //when a tool is selected primary color becomes the selection color
+                    b.toolbarHighlight();
+                } else if (b.isToolbarColored() && !containingToolbar.getToolHeld().equals(b.getTitle())) { //when a tool is not selected the primary color becomes base color
+                    b.resetToolbarColor();
                 }
             }
         }

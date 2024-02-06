@@ -1,7 +1,10 @@
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.LinkedList;
 
 public class Grid extends JPanel implements MouseListener, MouseMotionListener, MouseWheelListener {
 
@@ -73,6 +76,9 @@ public class Grid extends JPanel implements MouseListener, MouseMotionListener, 
 
     public void setFirstInput(Point p) {
         firstInput = p;
+    }
+    public Point getFirstInput() {
+        return firstInput;
     }
 
     public void display(Graphics g) {
@@ -148,12 +154,16 @@ public class Grid extends JPanel implements MouseListener, MouseMotionListener, 
 
         ArrayList<Wire> wiresDelete = new ArrayList<>();
 
+        Graphics2D g2 = (Graphics2D)g;
+        g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+
         for(Wire w : wires) {
             if(cells.get(w.getX1(), w.getY1()) == null || cells.get(w.getX2(), w.getY2()) == null) {
                 wiresDelete.add(w);
             }
             else {
-                w.drawWire(g, this, cells);
+                w.drawWire(g2, this, cells);
+                drawTriangle(g2, w.getxOne(), w.getyOne(), w.getxTwo(), w.getyTwo());
             }
         }
         for(Wire w : wiresDelete) {
@@ -163,6 +173,7 @@ public class Grid extends JPanel implements MouseListener, MouseMotionListener, 
 
         if(wireToCursor != null) {
             wireToCursor.drawWire(g, this);
+            drawTriangle(g2, wireToCursor.getX1(), wireToCursor.getY1(), wireToCursor.getX2(), wireToCursor.getY2());
         }
 
     }
@@ -213,98 +224,152 @@ public class Grid extends JPanel implements MouseListener, MouseMotionListener, 
 
         int col = (int)Math.floor(toXCoord(e.getX())/cellWidth);
         int row = (int)Math.floor(toYCoord(e.getY())/cellWidth);
-
-        switch (associatedGUI.getToolHeld()) {
-            case "" -> {
-                if(cells.get(col, row) instanceof Switch) {
-                    ((Switch)(cells.get(col, row))).switchInput();
-                }
-            }
-            case "Wire" -> {
-                if(cells.get(col, row) != null) {
-                    if(firstInput == null) {
-                        firstInput = new Point(col, row);
+        if(!mouseOverWire) {
+            switch (associatedGUI.getToolHeld()) {
+                case "" -> {
+                    if (cells.get(col, row) instanceof Switch) {
+                        ((Switch) (cells.get(col, row))).switchInput();
                     }
-                    else {
-                        if(cells.get(col, row) instanceof OnBlock || cells.get(col, row) instanceof Switch || cells.get(col, row).isFull()) { //do nothing since start
-                            break;
-                        }
-                        if(cells.get(col, row) instanceof Custom) {
-                            Operator temp = ((Custom) (cells.get(col, row))).getFirstEmpty();
-                            if(temp != null) {
-                                temp.setPrev1(cells.get((int)firstInput.getX(), (int)firstInput.getY()));
-                            }
-                            else {
+                }
+                case "Wire" -> {
+                    if (cells.get(col, row) != null) {
+                        if (firstInput == null) {
+                            firstInput = new Point(col, row);
+                        } else {
+                            if (cells.get(col, row) instanceof OnBlock || cells.get(col, row) instanceof Switch || cells.get(col, row).isFull()) { //do nothing since start
                                 break;
                             }
+                            if (cells.get(col, row) instanceof Custom) {
+                                Operator temp = ((Custom) (cells.get(col, row))).getFirstEmpty();
+                                if (temp != null) {
+                                    temp.setPrev1(cells.get((int) firstInput.getX(), (int) firstInput.getY()));
+                                } else {
+                                    break;
+                                }
+                            } else if (cells.get(col, row) instanceof Operator2I && cells.get(col, row).getPrev1() != null) { //if it has two inputs and the first is taken
+                                ((Operator2I) cells.get(col, row)).setPrev2(cells.get((int) firstInput.getX(), (int) (firstInput.getY()))); //Go to the second slot
+                                ((Operator2I) cells.get(col, row)).setColor2(currentWireColor);
+                            } else { //first slot
+                                cells.get(col, row).setPrev1(cells.get((int) firstInput.getX(), (int) (firstInput.getY()))); //set 2nd operator's previous to 1st operator
+                                cells.get(col, row).setColor(currentWireColor);
+                            }
+                            createWire((int) firstInput.getX(), (int) firstInput.getY(), col, row);
+                            firstInput = null;
+                            updateWireToCursor();
                         }
-                        else if (cells.get(col, row) instanceof Operator2I && cells.get(col, row).getPrev1() != null) { //if it has two inputs and the first is taken
-                            ((Operator2I)cells.get(col, row)).setPrev2(cells.get((int)firstInput.getX(), (int)(firstInput.getY()))); //Go to the second slot
-                            ((Operator2I)cells.get(col, row)).setColor2(currentWireColor);
-                        }
-                        else { //first slot
-                            cells.get(col, row).setPrev1(cells.get((int)firstInput.getX(), (int)(firstInput.getY()))); //set 2nd operator's previous to 1st operator
-                            cells.get(col, row).setColor(currentWireColor);
-                        }
-                        createWire((int)firstInput.getX(), (int)firstInput.getY(), col, row);
-                        firstInput = null;
-                        updateWireToCursor();
                     }
                 }
-            }
-            case "Not" -> {
-                Operator notBlock = new NotBlock(row, col, null); //(row, col) = (y, x)  <---- !!!
-                cells.set(col, row, notBlock);
-            }
-            case "And" -> {
-                Operator andBlock = new AndBlock(row, col,null, null);
-                cells.set(col, row, andBlock);
-            }
-            case "Trash" -> {
-                if(cells.get(col, row) != null) {
-                    deletePointersTo(cells.get(col, row));
-                    cells.set(col, row, null);
+                case "Not" -> {
+                    Operator notBlock = new NotBlock(row, col, null); //(row, col) = (y, x)  <---- !!!
+                    cells.set(col, row, notBlock);
+                }
+                case "And" -> {
+                    Operator andBlock = new AndBlock(row, col, null, null);
+                    cells.set(col, row, andBlock);
+                }
+                case "Trash" -> {
+                    if (cells.get(col, row) != null) {
+                        deletePointersTo(cells.get(col, row));
+                        cells.set(col, row, null);
+                    }
+                }
+                case "On" -> {
+                    Operator onBlock = new OnBlock(row, col);
+                    cells.set(col, row, onBlock);
+                }
+                case "Light" -> {
+                    Operator lt = new Light(row, col, null);
+                    cells.set(col, row, lt);
+                }
+                case "Switch" -> {
+                    Operator swi = new Switch(row, col);
+                    cells.set(col, row, swi);
+                }
+                case "In" -> {
+                    Operator inBlock = new Input(row, col);
+                    cells.set(col, row, inBlock);
+                }
+                case "Out" -> {
+                    Operator outBlock = new Output(row, col, null);
+                    cells.set(col, row, outBlock);
                 }
             }
-            case "On" -> {
-                Operator onBlock = new OnBlock(row, col);
-                cells.set(col, row, onBlock);
+        }
+        if(!wires.isEmpty()) {
+            for(Wire w : wires) {
+                if (w.contains(cursorX, cursorY) && !associatedGUI.getToolHeld().equals("Trash")) {
+                    selectWire(wires.indexOf(w));
+                }
+                if (w.contains(cursorX, cursorY) && associatedGUI.getToolHeld().equals("Trash")) {
+                    int clm = (int)Math.floor(toXCoord(w.getxOne())/cellWidth);
+                    int rw = (int)Math.floor(toYCoord(w.getyOne())/cellWidth);
+                    deletePointersTo(cells.get(clm, rw));
+                    wireToDelete = wires.indexOf(w);
+                }
             }
-            case "Light" -> {
-                Operator lt = new Light(row, col,null);
-                cells.set(col, row, lt);
-            }
-            case "Switch" -> {
-                Operator swi = new Switch(row, col);
-                cells.set(col, row, swi);
-            }
-            case "In" -> {
-                Operator inBlock = new Input(row, col);
-                cells.set(col, row, inBlock);
-            }
-            case "Out" -> {
-                Operator outBlock = new Output(row, col, null);
-                cells.set(col, row, outBlock);
+            if (wireToDelete != -1) {
+                System.out.println("Wire deleted at index: "+wireToDelete);
+                wires.remove(wireToDelete);
+                selectedWire = -1;
+                wireIsSelected = false;
+                wireToDelete = -1;
+                mouseOverWire = false;
             }
         }
 
         repaint();
     }
 
+    private void drawTriangle(Graphics2D g, int x1, int y1, int x2, int y2){
+        double angle = Math.atan2(y2-y1, x2-x1);
+        double xMid = (x1+x2)/2.0;
+        double yMid = (y1+y2)/2.0;
+        double x0 = xMid - 15 * Math.cos(angle);
+        double y0 = yMid - 15 * Math.sin(angle);
+        double angle2 = Math.PI / 2 - angle;
+        double xt = x0 - 10 * Math.cos(angle2);
+        double yt = y0 + 10 * Math.sin(angle2);
+        double xb = x0 + 10 * Math.cos(angle2);
+        double yb = y0 - 10 * Math.sin(angle2);
+        g.fillPolygon(new int[]{(int)xMid, (int)xt, (int)xb},new int[]{(int)yMid, (int)yt, (int)yb},3);
+    }
+
+    private void selectWire(int select) {
+        if(selectedWire == select) {
+            System.out.println("Wire at index "+selectedWire+" unselected!");
+            wires.get(selectedWire).setSelected(false);
+            selectedWire = -1;
+            wireIsSelected = false;
+        }
+        else {
+            selectedWire = select;
+            System.out.println("Wire at index "+selectedWire+" selected!");
+
+            for(Wire w : wires) {
+                w.setSelected(wires.indexOf(w) == selectedWire);
+            }
+
+            wireIsSelected = true;
+        }
+        repaint();
+    }
+
     private void deletePointersTo(Operator n) {
         for(Operator temp1 : cells) {
-            if (temp1 instanceof Custom) {
-                for (Operator temp : (((Custom) temp1).getInputs())) {
-                    if (temp.getPrev1() == n) {
-                        temp.setPrev1(null);
+            if (temp1 != null) {
+                if (temp1 instanceof Custom) {
+                    for (Operator temp : (((Custom) temp1).getInputs())) {
+                        if (temp.getPrev1() == n) {
+                            temp.setPrev1(null);
+                        }
                     }
-                }
-            } else {
-                if (temp1.getPrev1() == n) {
-                    temp1.setPrev1(null);
-                }
-                if (temp1 instanceof Operator2I && ((Operator2I) temp1).getPrev2() == n) {
-                    ((Operator2I) temp1).setPrev2(null);
+                } else {
+                    if (temp1.getPrev1() == n) {
+                        temp1.setPrev1(null);
+                    }
+                    if (temp1 instanceof Operator2I && ((Operator2I) temp1).getPrev2() == n) {
+                        ((Operator2I) temp1).setPrev2(null);
+                    }
                 }
             }
         }
@@ -372,7 +437,12 @@ public class Grid extends JPanel implements MouseListener, MouseMotionListener, 
 
         updateWireToCursor();
 
-        System.out.println("X: "+mouseX+ " Y: "+mouseY);
+        if(!wires.isEmpty()) {
+            for(Wire w : wires) {
+                mouseOverWire = w.contains(cursorX, cursorY);
+                w.setMouseCovering(w.contains(cursorX, cursorY));
+            }
+        }
 
         repaint();
     }
@@ -398,7 +468,7 @@ public class Grid extends JPanel implements MouseListener, MouseMotionListener, 
         }
         scaleFactor = Math.pow(scaleFactor, Math.copySign(1, amount));
         zoom(scaleFactor, e.getX(), e.getY());
-        System.out.println(scale);
-
     }
+
+
 }
