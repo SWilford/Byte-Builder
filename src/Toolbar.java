@@ -5,6 +5,9 @@ import java.util.ArrayList;
 
 public class Toolbar extends JPanel implements MouseListener, MouseMotionListener, MouseWheelListener {
 
+    public final JWindow colorWindow;
+    private final colorPanel colorpanel = new colorPanel();
+
     private final ImageIcon wireToolImg = new ImageIcon("Images/copwire.png");
     private final ImageIcon andImage = new ImageIcon("Images/AndGate.png");
     private final ImageIcon notImage = new ImageIcon("Images/NotGate.png");
@@ -59,6 +62,14 @@ public class Toolbar extends JPanel implements MouseListener, MouseMotionListene
 
         currentWireColor = grid.getAssociatedGUI().getCurrentWireColor();
 
+        colorWindow = new JWindow();
+        colorWindow.add(colorpanel);
+        colorWindow.pack();
+        colorWindow.setBounds(0, 0, 80, 120);
+    }
+
+    public void sting(Graphics g) {
+        colorWindow.setVisible(associatedGrid.getAssociatedGUI().getToolHeld() != null && (associatedGrid.getAssociatedGUI().getToolHeld().equals("Wire") || associatedGrid.isWireIsSelected()));
     }
 
     public ArrayList<ToolButton> getButtons() {
@@ -123,6 +134,7 @@ public class Toolbar extends JPanel implements MouseListener, MouseMotionListene
         if (!s.equals("wire") || toolHeld.isEmpty()) {
             associatedGrid.setFirstInput(null);
         }
+
     }
 
     public void processUserInput(int k){ //k is key input from kb

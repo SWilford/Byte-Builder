@@ -77,6 +77,7 @@ public class ToolButton extends JPanel implements MouseListener {
         if(e.getButton() == MouseEvent.BUTTON1) {
             pseudoMouseClicked(title);
         }
+        containingToolbar.sting(this.getGraphics());
     }
 
     public void pseudoMouseClicked(String t) {
@@ -113,10 +114,12 @@ public class ToolButton extends JPanel implements MouseListener {
     @Override
     public void mouseEntered(MouseEvent e) {
         highlight();
+        containingToolbar.sting(this.getGraphics());
     }
 
     @Override
     public void mouseExited(MouseEvent e) {
         unHighlight();
+        containingToolbar.sting(this.getGraphics());
     }
 }

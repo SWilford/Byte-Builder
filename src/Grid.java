@@ -16,7 +16,7 @@ public class Grid extends JPanel implements MouseListener, MouseMotionListener, 
     private int wireToDelete;
     private int selectedWire;
     private boolean wireIsSelected;
-    public ArrayList<Button> wireColors = new ArrayList<>();
+
     public Wire wireToCursor; //The wire being generated when wire tool is selected
     private int mouseX; //X position of cursor COLUMN
     private int mouseY; //Y position of cursor ROW
@@ -176,12 +176,18 @@ public class Grid extends JPanel implements MouseListener, MouseMotionListener, 
             drawTriangle(g2, wireToCursor.getX1(), wireToCursor.getY1(), wireToCursor.getX2(), wireToCursor.getY2());
         }
 
+        associatedGUI.toolbar.sting(g2);
+
     }
 
     @Override
     public void paintComponent(Graphics g) {
         super.paintComponent(g);
         display(g);
+    }
+
+    public boolean isWireIsSelected() {
+        return wireIsSelected;
     }
 
 
