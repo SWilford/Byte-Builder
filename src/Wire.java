@@ -161,7 +161,7 @@ public class Wire {
         wireStroke = new BasicStroke(3);
         g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
         g2.setStroke(wireStroke);
-        g2.setColor(clr);
+        //g2.setColor(this.getColor());
         int cellWidth = grid.getCellWidth();
         int max = grid.toXPosOnWindow(cellWidth + grid.getEks());
         x1 = grid.toXPosOnWindow(x1 * cellWidth)+(max/5*4);
@@ -211,7 +211,7 @@ public class Wire {
             g2.drawLine(xOne, yOne, xTwo, yTwo);
         }
         g2.setStroke(wireStroke);
-        g2.setColor(clr);
+        g2.setColor(this.getColor());
         g2.drawLine(xOne, yOne, xTwo, yTwo);
 
     }

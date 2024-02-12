@@ -156,8 +156,14 @@ public class Grid extends JPanel implements MouseListener, MouseMotionListener, 
 
         Graphics2D g2 = (Graphics2D)g;
         g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+        currentWireColor = associatedGUI.getCurrentWireColor();
+
 
         for(Wire w : wires) {
+            if(w.isSelected()) {
+                w.setColor(currentWireColor);
+            }
+
             if(cells.get(w.getX1(), w.getY1()) == null || cells.get(w.getX2(), w.getY2()) == null) {
                 wiresDelete.add(w);
             }
@@ -170,6 +176,7 @@ public class Grid extends JPanel implements MouseListener, MouseMotionListener, 
             wires.remove(w);
         }
 
+        g2.setColor(stringToColor(associatedGUI.getCurrentWireColor()));
 
         if(wireToCursor != null) {
             wireToCursor.drawWire(g, this);
@@ -178,6 +185,18 @@ public class Grid extends JPanel implements MouseListener, MouseMotionListener, 
 
         associatedGUI.toolbar.sting(g2);
 
+    }
+
+    private Color stringToColor(String s) {
+        switch (s) {
+            case "red" -> {return Color.RED;}
+            case "green" -> {return Color.GREEN;}
+            case "blue" -> {return Color.BLUE;}
+            case "orange" -> {return Color.ORANGE;}
+            case "yellow" -> {return Color.YELLOW;}
+            case "white" -> {return Color.WHITE;}
+        }
+        return null;
     }
 
     @Override

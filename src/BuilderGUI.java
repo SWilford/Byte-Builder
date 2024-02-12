@@ -2,7 +2,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 
-public class BuilderGUI extends JPanel implements MouseListener, MouseMotionListener, MouseWheelListener {
+public class BuilderGUI extends JPanel implements MouseListener, MouseMotionListener, MouseWheelListener, ComponentListener{
 
     Toolbar toolbar;
 
@@ -70,6 +70,26 @@ public class BuilderGUI extends JPanel implements MouseListener, MouseMotionList
 
     @Override
     public void mouseWheelMoved(MouseWheelEvent e) {
+
+    }
+
+    @Override
+    public void componentResized(ComponentEvent e) {
+        toolbar.updateColorWindowPosition();
+    }
+
+    @Override
+    public void componentMoved(ComponentEvent e) {
+        toolbar.updateColorWindowPosition();
+    }
+
+    @Override
+    public void componentShown(ComponentEvent e) {
+
+    }
+
+    @Override
+    public void componentHidden(ComponentEvent e) {
 
     }
 }
