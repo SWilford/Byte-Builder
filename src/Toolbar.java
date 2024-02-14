@@ -63,22 +63,25 @@ public class Toolbar extends JPanel implements MouseListener, MouseMotionListene
         currentWireColor = grid.getAssociatedGUI().getCurrentWireColor();
 
         colorWindow = new JWindow();
+        colorWindow.setPreferredSize(new Dimension(238, 160));
         colorWindow.add(colorpanel);
         colorWindow.pack();
         if(colorWindow.isVisible()) {
-            colorWindow.setBounds(this.getLocationOnScreen().x, this.getLocationOnScreen().y, 80, 120);
+            colorWindow.setLocation(this.getLocationOnScreen().x, this.getLocationOnScreen().y+associatedGrid.getHeight()-colorWindow.getHeight());
         }
     }
 
     public void updateColorWindowPosition() {
         if(colorWindow.isVisible()) {
-            colorWindow.setBounds(this.getLocationOnScreen().x, this.getLocationOnScreen().y, 80, 120);
+            colorWindow.setLocation(this.getLocationOnScreen().x, this.getLocationOnScreen().y+associatedGrid.getHeight()-colorWindow.getHeight());
         }
         colorWindow.repaint();
     }
 
     public void sting(Graphics g) {
-        colorWindow.setVisible(associatedGrid.getAssociatedGUI().getToolHeld() != null && (associatedGrid.getAssociatedGUI().getToolHeld().equals("Wire") || associatedGrid.isWireIsSelected()));
+        boolean case1 = associatedGrid.getAssociatedGUI().getToolHeld() != null && (associatedGrid.getAssociatedGUI().getToolHeld().equals("Wire") || associatedGrid.isWireIsSelected());
+        colorWindow.setVisible(case1);
+        updateColorWindowPosition();
     }
 
     public Grid getAssociatedGrid() {
