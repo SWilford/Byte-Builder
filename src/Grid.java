@@ -4,12 +4,13 @@ import java.awt.event.*;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedList;
 
 public class Grid extends JPanel implements MouseListener, MouseMotionListener, MouseWheelListener {
 
     private BuilderGUI associatedGUI;
-    private final SparseMatrix<Operator> cells = new SparseMatrix<>();
+    private SparseMatrix<Operator> cells = new SparseMatrix<>();
     public ArrayList<Wire> wires = new ArrayList<>(); // stores wires to be drawn
     private boolean mouseOverWire;
     public String currentWireColor;
@@ -285,7 +286,7 @@ public class Grid extends JPanel implements MouseListener, MouseMotionListener, 
                     }
                 }
                 case "Not" -> {
-                    Operator notBlock = new NotBlock(row, col, null); //(row, col) = (y, x)  <---- !!!
+                    Operator notBlock = new NotBlock(row, col, null); //(row, col) = (y, x)  <---- !!!!!!!!!!
                     cells.set(col, row, notBlock);
                 }
                 case "And" -> {
@@ -400,6 +401,10 @@ public class Grid extends JPanel implements MouseListener, MouseMotionListener, 
         }
     }
 
+    public SparseMatrix<Operator> getCells(){
+        return cells;
+    }
+
     private void createWire(int c1, int r1, int c2, int r2) {
         wires.add(new Wire(c1, r1, c2, r2, currentWireColor));
     }
@@ -495,5 +500,38 @@ public class Grid extends JPanel implements MouseListener, MouseMotionListener, 
         zoom(scaleFactor, e.getX(), e.getY());
     }
 
+    public void processUserInput(int k) { //k is key input from kb
 
+        switch (k) {
+            case KeyEvent.VK_S -> {
+                try {
+                    Manager.writeToFile(cells, "Saves/untitled.txt");
+                }
+                catch(Exception ignored){}
+            }
+            case KeyEvent.VK_L -> {
+                try {
+                    cells = Manager.readFile("Saves/untitled.txt");
+                    for (Operator n : cells){
+                        if (n instanceof Custom){
+                            for (Operator input : ((Custom) n).getInputs()){
+                                wires.add(new Wire(input.getCol(), input.getRow(), (int) n.getCol(), (int) n.getRow(), input.getColor())); //wires.add(new Wire(c1, r1, c2, r2, currentWireColor)
+                            }
+                        }
+                        else {
+                            if (n.getPrev1() != null) {
+                                wires.add(new Wire(n.getPrev1().getCol(), n.getPrev1().getRow(), (int) n.getCol(), (int) n.getRow(), n.getColor()));
+                            }
+                            if (n instanceof Operator2I && ((Operator2I) n).getPrev2() != null){
+                                wires.add(new Wire(((Operator2I) n).getPrev2().getCol(), ((Operator2I) n).getPrev2().getRow(), (int) n.getCol(), (int) n.getRow(), ((Operator2I) n).getColor2()));
+                            }
+                        }
+                    }
+                } catch (IOException | ClassNotFoundException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        }
+        repaint();
+    }
 }

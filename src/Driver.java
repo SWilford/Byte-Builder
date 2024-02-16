@@ -34,6 +34,7 @@ public class Driver {
         public void keyTyped(KeyEvent e){}
         public void keyPressed(KeyEvent e){
             screen.toolbar.processUserInput(e.getKeyCode());
+            screen.grid.processUserInput(e.getKeyCode());
         }
         public void keyReleased(KeyEvent e){
 

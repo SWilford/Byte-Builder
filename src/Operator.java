@@ -39,7 +39,7 @@ public abstract class Operator {
     public abstract boolean getOutput();
 
     public String toString(){
-        return this.getClass().getName() + " Prev: " + previous1 + " (" + row + ", " + col + ")";
+        return this.getClass().getName() + ", " + color + ", null, " + col + ", " + row;
     }
 
     public void setColor(String c) {

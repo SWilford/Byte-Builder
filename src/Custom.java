@@ -1,7 +1,7 @@
 import java.lang.reflect.Array;
 import java.util.*;
 public class Custom extends Operator{
-    private final ArrayList<Operator> inputs; //different way to handle inputs
+    private final ArrayList<Operator> inputs; //different way to handle inputs, only contains Input operators
     private final LinkedList<Operator> block;
     private final String name;
 
@@ -37,6 +37,10 @@ public class Custom extends Operator{
             }
         }
         return false;
+    }
+
+    public String toString(){
+        return this.getClass().getName() + "(" + name + "), " + color + ", null, " + col + ", " + row;
     }
 
     public String getName() {

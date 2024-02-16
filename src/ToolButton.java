@@ -82,7 +82,7 @@ public class ToolButton extends JPanel implements MouseListener {
 
     public void pseudoMouseClicked(String t) {
         containingToolbar.toolButtonHelper(t);
-        if (containingToolbar.getToolHeld().isEmpty()) {
+        if (containingToolbar.getToolHeld().isEmpty() || t == null) {
             System.out.println("Tool Unselected");
             color = baseColor;
         } else {

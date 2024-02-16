@@ -59,6 +59,7 @@ public class Toolbar extends JPanel implements MouseListener, MouseMotionListene
 
         toolSelected = false;
         associatedGrid = grid;
+        toolHeld = "";
 
         currentWireColor = grid.getAssociatedGUI().getCurrentWireColor();
 
@@ -153,12 +154,14 @@ public class Toolbar extends JPanel implements MouseListener, MouseMotionListene
 
     }
 
-    public void processUserInput(int k){ //k is key input from kb
+    public void processUserInput(int k) { //k is key input from kb
 
-        switch (k){
-            case KeyEvent.VK_ESCAPE -> {
-                if (associatedGrid.getFirstInput() != null){
+        switch (k) {
+            case KeyEvent.VK_ESCAPE -> { //deselect wire
+                if (associatedGrid.getFirstInput() != null) { //fix
                     associatedGrid.setFirstInput(null);
+                } else if (toolSelected) {
+                    buttons.get(18).pseudoMouseClicked("");
                 }
             }
             case KeyEvent.VK_1 -> buttons.get(0).pseudoMouseClicked("Wire");
@@ -172,8 +175,7 @@ public class Toolbar extends JPanel implements MouseListener, MouseMotionListene
             case KeyEvent.VK_9 -> buttons.get(8).pseudoMouseClicked("Out");
 
 
-
         }
+        sting(this.getGraphics());
     }
-
 }
