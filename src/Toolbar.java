@@ -18,6 +18,8 @@ public class Toolbar extends JPanel implements MouseListener, MouseMotionListene
     private final ImageIcon inImage = new ImageIcon("Images/Input.png");
     private final ImageIcon outImage = new ImageIcon("Images/Output.png");
 
+    private final ImageIcon plusImage = new ImageIcon("Images/Plus.png");
+
     private String toolHeld;
     private boolean toolSelected;
 
@@ -38,7 +40,7 @@ public class Toolbar extends JPanel implements MouseListener, MouseMotionListene
         buttons.add(new ToolButton("Switch", switchOff, this));
         buttons.add(new ToolButton("In", inImage, this));
         buttons.add(new ToolButton("Out", outImage, this));
-        buttons.add(new ToolButton("", null, this));
+        buttons.add(new ToolButton("Import", plusImage, this));
         buttons.add(new ToolButton("", null, this));
         buttons.add(new ToolButton("", null, this));
         buttons.add(new ToolButton("", null, this));
@@ -70,6 +72,8 @@ public class Toolbar extends JPanel implements MouseListener, MouseMotionListene
         if(colorWindow.isVisible()) {
             colorWindow.setLocation(this.getLocationOnScreen().x, this.getLocationOnScreen().y+associatedGrid.getHeight()-colorWindow.getHeight());
         }
+
+
     }
 
     public void updateColorWindowPosition() {

@@ -2,6 +2,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.io.File;
 
 public class ToolButton extends JPanel implements MouseListener {
     private final String title; //Title for the button
@@ -81,21 +82,29 @@ public class ToolButton extends JPanel implements MouseListener {
     }
 
     public void pseudoMouseClicked(String t) {
-        containingToolbar.toolButtonHelper(t);
-        if (containingToolbar.getToolHeld().isEmpty() || t == null) {
-            System.out.println("Tool Unselected");
-            color = baseColor;
-        } else {
-            System.out.println("Tool Selected: " + containingToolbar.getToolHeld());
-            color = toolbarHighlightColor;
-        }
+        if(t.equals("Import")) {
+            System.out.println("Choose file to import as a custom block");
+            FileExplorer fileExplorer = new FileExplorer();
+            fileExplorer.selectFile();
 
-        for (ToolButton b : containingToolbar.getButtons()) {
-            if (!b.title.isEmpty()) {
-                if (containingToolbar.getToolHeld().equals(b.getTitle()) && !b.isToolbarColored()) { //when a tool is selected primary color becomes the selection color
-                    b.toolbarHighlight();
-                } else if (b.isToolbarColored() && !containingToolbar.getToolHeld().equals(b.getTitle())) { //when a tool is not selected the primary color becomes base color
-                    b.resetToolbarColor();
+        }
+        else {
+            containingToolbar.toolButtonHelper(t);
+            if (containingToolbar.getToolHeld().isEmpty() || t == null) {
+                System.out.println("Tool Unselected");
+                color = baseColor;
+            } else {
+                System.out.println("Tool Selected: " + containingToolbar.getToolHeld());
+                color = toolbarHighlightColor;
+            }
+
+            for (ToolButton b : containingToolbar.getButtons()) {
+                if (!b.title.isEmpty()) {
+                    if (containingToolbar.getToolHeld().equals(b.getTitle()) && !b.isToolbarColored()) { //when a tool is selected primary color becomes the selection color
+                        b.toolbarHighlight();
+                    } else if (b.isToolbarColored() && !containingToolbar.getToolHeld().equals(b.getTitle())) { //when a tool is not selected the primary color becomes base color
+                        b.resetToolbarColor();
+                    }
                 }
             }
         }
