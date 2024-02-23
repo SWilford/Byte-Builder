@@ -19,6 +19,8 @@ public class FileManager {
         return size;
     }
 
+
+
     public static LinkedList<Operator> readFile(String fileName) throws IOException, ClassNotFoundException { //returns array of operators that have their connections
         LinkedList<Operator> arr = new LinkedList<>();
         LinkedList<String[]> inputs = new LinkedList<>();
@@ -81,7 +83,9 @@ public class FileManager {
 
     public static void writeToFile(LinkedList<Operator> array, String filename) throws IOException
     {
+        String imagePath = "/ImageSaves/OrImage.png"; //Will be actual path to image
         System.setOut(new PrintStream(new FileOutputStream(filename)));
+        System.out.print(imagePath);
         for(int i = 0; i < array.size(); i++){
             Operator op = array.get(i);
             String n = op.getClass().getName();

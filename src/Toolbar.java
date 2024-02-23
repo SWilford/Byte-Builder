@@ -76,6 +76,18 @@ public class Toolbar extends JPanel implements MouseListener, MouseMotionListene
 
     }
 
+    public void reDraw() {
+        this.removeAll();
+        for(ToolButton t: buttons) {
+            this.add(t);
+        }
+
+        revalidate();
+        repaint();
+    }
+
+
+
     public void updateColorWindowPosition() {
         if(colorWindow.isVisible()) {
             colorWindow.setLocation(this.getLocationOnScreen().x, this.getLocationOnScreen().y+associatedGrid.getHeight()-colorWindow.getHeight());

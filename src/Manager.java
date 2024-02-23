@@ -22,11 +22,16 @@ public class Manager {
         return size;
     }
 
+    public static String getImage(String fileName) throws IOException, ClassNotFoundException {
+        Scanner input = new Scanner(new FileReader(fileName));
+        return input.nextLine();
+    }
+
     public static SparseMatrix<Operator> readFile(String fileName) throws IOException, ClassNotFoundException { //returns array of operators that have their connections
         SparseMatrix<Operator> arr = new SparseMatrix<>();
         Scanner input = new Scanner(new FileReader(fileName));
         HashMap<Point, LinkedList<Point>> inputs = new HashMap<>(); //key is starting point, value is list of previous
-
+        input.nextLine();
         while (input.hasNextLine()){
             String[] parsed = input.nextLine().split(",");
             String name = parsed[0].trim();

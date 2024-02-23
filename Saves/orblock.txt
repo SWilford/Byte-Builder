@@ -1,3 +1,4 @@
+/ImageSaves/OrImage.png
 Input, red, null, 0, 0
 NotBlock, red, null, 1, 0, 0
 AndBlock, red, red, 2, 0, 1, 5

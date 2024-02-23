@@ -3,10 +3,11 @@ import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.io.File;
+import java.io.IOException;
 
 public class ToolButton extends JPanel implements MouseListener {
-    private final String title; //Title for the button
-    private final ImageIcon image; //Stores the base image
+    private String title; //Title for the button
+    private ImageIcon image; //Stores the base image
     private Color color;
     private Color baseColor;
     private final Color highlightColor; //Colors of the button
@@ -81,12 +82,29 @@ public class ToolButton extends JPanel implements MouseListener {
         containingToolbar.sting(this.getGraphics());
     }
 
+    public void setTitle(String t) {
+        title = t;
+    }
+
+    public void setImage(ImageIcon imageIcon) {
+        image = imageIcon;
+    }
+
     public void pseudoMouseClicked(String t) {
         if(t.equals("Import")) {
             System.out.println("Choose file to import as a custom block");
             FileExplorer fileExplorer = new FileExplorer();
-            fileExplorer.selectFile();
+            File f = fileExplorer.selectFile();
+            String fName = f.getName().substring(0, f.getName().length()-4);
+            ImageIcon fImage = new ImageIcon("");
+            try {
+                fImage = new ImageIcon(Manager.getImage(f.getPath()).substring(1));
+                System.out.println(Manager.getImage(f.getPath()));
 
+            } catch (Exception ignored) {
+            }
+            containingToolbar.getButtons().add(containingToolbar.getButtons().indexOf(this), new ToolButton(fName, fImage, containingToolbar));
+            containingToolbar.reDraw();
         }
         else {
             containingToolbar.toolButtonHelper(t);

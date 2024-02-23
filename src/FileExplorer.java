@@ -6,29 +6,19 @@ import java.io.File;
 
 public class FileExplorer {
 
-
-
-    private File file;
-
-
     public FileExplorer() {
 
     }
 
-    public void selectFile() {
-
-        FileDialog fd = new FileDialog(new JFrame());
+    public File selectFile() {
+        FileDialog fd = new FileDialog(new JFrame(), "Load", FileDialog.LOAD);
+        fd.setDirectory("Saves/");
         fd.setVisible(true);
-        File[] f = fd.getFiles();
-        if(f.length > 0){
-            System.out.println(fd.getFiles()[0].getAbsolutePath());
-        }
-
+        fd.setFilenameFilter((dir, name) -> name.endsWith(".txt"));
+        return new File("Saves/" + fd.getFile());
     }
 
-    public File getFile() {
-        return file;
-    }
+
 
 
 
