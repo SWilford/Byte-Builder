@@ -621,7 +621,7 @@ public class GUI extends JPanel implements MouseListener, MouseMotionListener, M
             }
             case KeyEvent.VK_T -> {
                 try {
-                    insert(new Custom(5, 5, FileManager.readFile("Saves/xor.txt"), "xor"));
+                    insert(new Custom(5, 5, Manager.readFile("Saves/xor.txt"), "xor"));
                 } catch (IOException | ClassNotFoundException e) {
                     throw new RuntimeException(e);
                 }

@@ -1,8 +1,9 @@
-AndBlock, red, red, 2, 3, 1, 2
-Input, red, null, 0, 4
-NotBlock, red, null, 2, 4, 3
-Input, red, null, 0, 5
-NotBlock, red, null, 2, 5, 1
-Custom(orblock), red, null, 5, 5, 0, 7
-Output, red, null, 8, 5, 5
-AndBlock, red, red, 2, 6, 3, 4
+/ImageSaves/XorImage.png
+Input, red, null, 2, 4
+AndBlock, red, red, 4, 4, (2. 5), (4. 3)
+Custom(orblock), red, null, 8, 4, (4. 4), (4. 5)
+NotBlock, red, null, 4, 3, (2. 4)
+NotBlock, red, null, 4, 6, (2. 5)
+Output, red, null, 10, 5, (8. 4)
+Input, red, null, 2, 5
+AndBlock, red, red, 4, 5, (2. 4), (4. 6)

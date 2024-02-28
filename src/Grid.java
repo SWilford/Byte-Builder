@@ -150,6 +150,14 @@ public class Grid extends JPanel implements MouseListener, MouseMotionListener, 
                 if(o instanceof Output) {
                     g.drawImage(outImage.getImage(), toXPosOnWindow(o.getCol() * cellWidth), toYPosOnWindow(o.getRow() * cellWidth), toXPosOnWindow(cellWidth + x), toYPosOnWindow(cellWidth + y), null);
                 }
+                if(o instanceof Custom){
+                    try {
+                        g.drawImage((new ImageIcon(Manager.getImage("Saves/" + ((Custom) o).getName() + ".txt").substring(1))).getImage(),
+                                toXPosOnWindow(o.getCol() * cellWidth), toYPosOnWindow(o.getRow() * cellWidth), toXPosOnWindow(cellWidth + x), toYPosOnWindow(cellWidth + y), null);
+                    } catch (IOException | ClassNotFoundException e) {
+                        throw new RuntimeException(e);
+                    }
+                }
             }
         }
 
@@ -256,6 +264,7 @@ public class Grid extends JPanel implements MouseListener, MouseMotionListener, 
                     if (cells.get(col, row) instanceof Switch) {
                         ((Switch) (cells.get(col, row))).switchInput();
                     }
+                    break;
                 }
                 case "Wire" -> {
                     if (cells.get(col, row) != null) {
@@ -284,40 +293,58 @@ public class Grid extends JPanel implements MouseListener, MouseMotionListener, 
                             updateWireToCursor();
                         }
                     }
+                    break;
                 }
                 case "Not" -> {
                     Operator notBlock = new NotBlock(row, col, null); //(row, col) = (y, x)  <---- !!!!!!!!!!
                     cells.set(col, row, notBlock);
+                    break;
                 }
                 case "And" -> {
                     Operator andBlock = new AndBlock(row, col, null, null);
                     cells.set(col, row, andBlock);
+                    break;
                 }
                 case "Trash" -> {
                     if (cells.get(col, row) != null) {
                         deletePointersTo(cells.get(col, row));
                         cells.set(col, row, null);
                     }
+                    break;
                 }
                 case "On" -> {
                     Operator onBlock = new OnBlock(row, col);
                     cells.set(col, row, onBlock);
+                    break;
                 }
                 case "Light" -> {
                     Operator lt = new Light(row, col, null);
                     cells.set(col, row, lt);
+                    break;
                 }
                 case "Switch" -> {
                     Operator swi = new Switch(row, col);
                     cells.set(col, row, swi);
+                    break;
                 }
                 case "In" -> {
                     Operator inBlock = new Input(row, col);
                     cells.set(col, row, inBlock);
+                    break;
                 }
                 case "Out" -> {
                     Operator outBlock = new Output(row, col, null);
                     cells.set(col, row, outBlock);
+                    break;
+                }
+                default -> { //place custom object!
+                    try {
+                        Operator customBlock = new Custom(row, col, Manager.readFile("Saves/" + associatedGUI.getToolHeld() + ".txt"), associatedGUI.getToolHeld());
+                        cells.set(col, row, customBlock);
+                        System.out.println(customBlock);
+                    } catch (IOException | ClassNotFoundException ex) {
+                        throw new RuntimeException(ex);
+                    };
                 }
             }
         }
@@ -505,13 +532,13 @@ public class Grid extends JPanel implements MouseListener, MouseMotionListener, 
         switch (k) {
             case KeyEvent.VK_S -> {
                 try {
-                    Manager.writeToFile(cells, "Saves/untitled.txt");
+                    Manager.writeToFile(cells, "Saves/xor.txt");
                 }
                 catch(Exception ignored){}
             }
             case KeyEvent.VK_L -> {
                 try {
-                    cells = Manager.readFile("Saves/untitled.txt");
+                    cells = Manager.readFile("Saves/xor.txt");
                     for (Operator n : cells){
                         if (n instanceof Custom){
                             for (Operator input : ((Custom) n).getInputs()){

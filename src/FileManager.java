@@ -44,7 +44,7 @@ public class FileManager {
 
             if (thing[0].contains("(")){ //custom
                 String name = thing[0].substring(thing[0].indexOf("(")+1,thing[0].indexOf(")"));
-                arr.add(new Custom(row, col, FileManager.readFile("Saves/" + name + ".txt"), name));
+                arr.add(new Custom(row, col, Manager.readFile("Saves/" + name + ".txt"), name));
             }
             else {
                 switch (thing[0].trim()) {

@@ -42,11 +42,11 @@ public class Manager {
             inputs.put(new Point(col, row), new LinkedList<>());
             for (int i = 5; i < parsed.length; i++){
                 String[] temp = parsed[i].split("\\.");
-                inputs.get(new Point(col, row)).add(new Point(Integer.parseInt(temp[0].trim().substring(1)), Integer.parseInt(temp[1].trim().substring(0, 1)))); //adds new input coord do map
+                inputs.get(new Point(col, row)).add(new Point(Integer.parseInt(temp[0].trim().substring(1)), Integer.parseInt(temp[1].trim().substring(0, 1)))); //adds new input coord to map
             }
             if (name.contains("(")){ //custom
                 String customname = name.substring(name.indexOf("(")+1,name.indexOf(")"));
-                arr.set(col, row, new Custom(row, col, FileManager.readFile("Saves/" + customname + ".txt"), customname));//deal with colors
+                arr.set(col, row, new Custom(row, col, Manager.readFile("Saves/" + customname + ".txt"), customname));
             }
             else {
                 switch (name) {
@@ -83,12 +83,13 @@ public class Manager {
     public static void writeToFile(SparseMatrix<Operator> n, String filename) throws IOException
     {
         System.setOut(new PrintStream(new FileOutputStream(filename)));
+        System.out.println();
         for(Operator temp : n) {
             String line = temp.toString();
 
             if (temp instanceof Custom){
                 for (Operator inputs : ((Custom) temp).getInputs()){
-                    line += ", (" + inputs.getCol() + ". " + inputs.getRow() + ")";
+                    line += ", (" + inputs.getPrev1().getCol() + ". " + inputs.getPrev1().getRow() + ")"; //fix this: its getting the orblock cols and rows
                 }
             }
             else {

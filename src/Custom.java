@@ -2,10 +2,10 @@ import java.lang.reflect.Array;
 import java.util.*;
 public class Custom extends Operator{
     private final ArrayList<Operator> inputs; //different way to handle inputs, only contains Input operators
-    private final LinkedList<Operator> block;
+    private final SparseMatrix<Operator> block;
     private final String name;
 
-    public Custom(int r, int c, LinkedList<Operator> s, String n) {
+    public Custom(int r, int c, SparseMatrix<Operator> s, String n) {
         super(r, c, null);
         inputs = new ArrayList<Operator>();
         block = s;
@@ -40,7 +40,7 @@ public class Custom extends Operator{
     }
 
     public String toString(){
-        return this.getClass().getName() + "(" + name + "), " + color + ", null, " + col + ", " + row;
+        return this.getClass().getName() + "(" + name + "), " + "red" + ", null, " + col + ", " + row;
     }
 
     public String getName() {
