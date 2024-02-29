@@ -542,7 +542,7 @@ public class Grid extends JPanel implements MouseListener, MouseMotionListener, 
                     for (Operator n : cells){
                         if (n instanceof Custom){
                             for (Operator input : ((Custom) n).getInputs()){
-                                wires.add(new Wire(input.getCol(), input.getRow(), (int) n.getCol(), (int) n.getRow(), input.getColor())); //wires.add(new Wire(c1, r1, c2, r2, currentWireColor)
+                                wires.add(new Wire(input.getPrev1().getCol(), input.getPrev1().getRow(), (int) n.getCol(), (int) n.getRow(), input.getColor())); //wires.add(new Wire(c1, r1, c2, r2, currentWireColor)
                             }
                         }
                         else {
