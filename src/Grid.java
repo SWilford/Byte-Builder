@@ -344,7 +344,7 @@ public class Grid extends JPanel implements MouseListener, MouseMotionListener, 
                         System.out.println(customBlock);
                     } catch (IOException | ClassNotFoundException ex) {
                         throw new RuntimeException(ex);
-                    };
+                    }
                 }
             }
         }
@@ -531,8 +531,11 @@ public class Grid extends JPanel implements MouseListener, MouseMotionListener, 
 
         switch (k) {
             case KeyEvent.VK_S -> {
+                FileExplorer fileExplorer = new FileExplorer();
+                String image = "/"+fileExplorer.selectFile(false).getPath().replace("\\", "/");
+
                 try {
-                    Manager.writeToFile(cells, "Saves/xor.txt");
+                    Manager.writeToFile(cells, "Saves/untitled.txt", image);
                 }
                 catch(Exception ignored){}
             }

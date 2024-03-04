@@ -94,7 +94,7 @@ public class ToolButton extends JPanel implements MouseListener {
         if(t.equals("Import")) {
             System.out.println("Choose file to import as a custom block");
             FileExplorer fileExplorer = new FileExplorer();
-            File f = fileExplorer.selectFile();
+            File f = fileExplorer.selectFile(true);
             String fName = f.getName().substring(0, f.getName().length()-4);
             ImageIcon fImage = new ImageIcon("");
             try {

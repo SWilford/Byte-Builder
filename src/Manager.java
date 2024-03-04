@@ -80,10 +80,15 @@ public class Manager {
         return arr;
     }
 
-    public static void writeToFile(SparseMatrix<Operator> n, String filename) throws IOException
+    public static void writeToFile(SparseMatrix<Operator> n, String tempFilename, String imageLocation) throws IOException
     {
+
+        FileExplorer fileExplorer = new FileExplorer();
+        String filename = fileExplorer.saveFile(tempFilename);
+
         System.setOut(new PrintStream(new FileOutputStream(filename)));
-        System.out.println();
+        System.out.println(imageLocation);
+
         for(Operator temp : n) {
             String line = temp.toString();
 
