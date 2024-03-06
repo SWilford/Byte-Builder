@@ -532,7 +532,11 @@ public class Grid extends JPanel implements MouseListener, MouseMotionListener, 
         switch (k) {
             case KeyEvent.VK_S -> {
                 FileExplorer fileExplorer = new FileExplorer();
-                String image = "/"+fileExplorer.selectFile(false).getPath().replace("\\", "/");
+                File file = fileExplorer.selectFile(false);
+                if(file.getName().isEmpty()) {
+                    return;
+                }
+                String image = "/"+file.getPath().replace("\\", "/");
 
                 try {
                     Manager.writeToFile(cells, "Saves/untitled.txt", image);

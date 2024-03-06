@@ -13,28 +13,49 @@ public class FileExplorer {
     public File selectFile(Boolean bool) {
         FileDialog fd;
         if(bool) {
-            fd = new FileDialog(new JFrame(), "Load Custom Component", FileDialog.LOAD);
-            fd.setDirectory("Saves/");
+            fd = new FileDialog(new JFrame(), "Load Custom Component");
+            fd.setDirectory("Saves\\");
+            fd.setFilenameFilter((dir, name) -> name.endsWith(".txt"));
         }
         else {
             fd = new FileDialog(new JFrame(), "Select Image for Custom Component", FileDialog.LOAD);
-            fd.setDirectory("ImageSaves/");
+            fd.setDirectory("ImageSaves\\");
+            fd.setFilenameFilter((dir, name) -> name.endsWith(".png"));
+
         }
+        fd.setMode(FileDialog.LOAD);
         fd.setVisible(true);
-        if(bool) {
-            fd.setFilenameFilter((dir, name) -> name.endsWith(".txt"));
-            return new File("Saves/" + fd.getFile());
+        if(fd.getFile() == null) {
+            return new File("");
+        }
+        else if(bool) {
+            if(fd.getFile().endsWith(".txt")) {
+                return new File("Saves/" + fd.getFile());
+            }
+            else {
+                JOptionPane.showMessageDialog(null, "Unsupported file type. \".txt\" file type is supported", "Error", JOptionPane.ERROR_MESSAGE);
+                selectFile(true);
+            }
+
         }
         else {
-            return new File("ImageSaves/" + fd.getFile());
+            if(fd.getFile().endsWith(".png")) {
+                return new File("ImageSaves/" + fd.getFile());
+            }
+            else {
+                JOptionPane.showMessageDialog(null, "Unsupported file type. \".png\" file type is supported", "Error", JOptionPane.ERROR_MESSAGE);
+                selectFile(false);
+            }
         }
+        return new File("");
     }
 
     public String saveFile(String filename) {
-        FileDialog fd = new FileDialog(new JFrame(), "Save Custom Component", FileDialog.SAVE);
-        //fd.setDirectory("Saves/");
+        FileDialog fd = new FileDialog(new JFrame(), "Save Custom Component");
+        fd.setDirectory("Saves\\");
         fd.setFilenameFilter((dir, name) -> name.endsWith(".txt"));
         fd.setFile(filename);
+        fd.setMode(FileDialog.SAVE);
         fd.setVisible(true);
         if (fd.getFile() != null) {
             File file = new File(fd.getDirectory(), fd.getFile());
