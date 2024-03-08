@@ -545,7 +545,7 @@ public class Grid extends JPanel implements MouseListener, MouseMotionListener, 
             }
             case KeyEvent.VK_L -> {
                 try {
-                    cells = Manager.readFile("Saves/xnor.txt");
+                    cells = Manager.readFile("Saves/tripleor.txt");
                     for (Operator n : cells){
                         if (n instanceof Custom){
                             for (Operator input : ((Custom) n).getInputs()){

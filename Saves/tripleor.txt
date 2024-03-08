@@ -1,0 +1,7 @@
+/ImageSaves/TripleImage.png
+Input, red, null, 4, 7
+Output, red, null, 12, 9, (9. 10)
+Input, red, null, 4, 11
+Custom(orblock), red, null, 7, 8, (4. 7), (4. 9)
+Input, red, null, 4, 9
+Custom(orblock), red, null, 9, 10, (7. 8), (4. 11)
