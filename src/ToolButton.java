@@ -1,5 +1,6 @@
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.io.File;
@@ -14,11 +15,14 @@ public class ToolButton extends JPanel implements MouseListener {
     private boolean toolbarColored; //Has the button been colored with toolbarHighlightColor?
     private final Color toolbarHighlightColor = new Color(75, 75, 75); //Color for when tool is selected
 
+    private int hotkey;
+
     private Toolbar containingToolbar;
 
-    public ToolButton(String t, ImageIcon i, Toolbar to) {
+    public ToolButton(String t, ImageIcon i, Toolbar to, int k) {
         title = t;
         image = i;
+        hotkey = k;
         baseColor = new Color(48, 48, 48);
         highlightColor = new Color(90, 90, 90);
         color = baseColor;
@@ -70,6 +74,8 @@ public class ToolButton extends JPanel implements MouseListener {
         super.paintComponent(g);
         if(image!=null) {
             g.drawImage(image.getImage(), 0,0, super.getWidth(), this.getHeight(), null);
+            g.setColor(Color.cyan);
+            g.drawString((char) getHotkey() + "", 0, 10);
         }
 
     }
@@ -92,7 +98,7 @@ public class ToolButton extends JPanel implements MouseListener {
 
     public void pseudoMouseClicked(String t) {
         if(t.equals("Import")) {
-            System.out.println("Choose file to import as a custom block");
+            //System.out.println("Choose file to import as a custom block");
             FileExplorer fileExplorer = new FileExplorer();
             File f = fileExplorer.selectFile(true);
             if(f.getName().isEmpty()) {
@@ -102,20 +108,20 @@ public class ToolButton extends JPanel implements MouseListener {
             ImageIcon fImage = new ImageIcon("");
             try {
                 fImage = new ImageIcon(Manager.getImage(f.getPath()).substring(1));
-                System.out.println(Manager.getImage(f.getPath()));
+                //System.out.println(Manager.getImage(f.getPath()));
 
             } catch (Exception ignored) {
             }
-            containingToolbar.getButtons().add(containingToolbar.getButtons().indexOf(this), new ToolButton(fName, fImage, containingToolbar));
+            containingToolbar.getButtons().add(containingToolbar.getButtons().indexOf(this), new ToolButton(fName, fImage, containingToolbar, Toolbar.newHotkey()));
             containingToolbar.reDraw();
         }
         else {
             containingToolbar.toolButtonHelper(t);
-            if (containingToolbar.getToolHeld().isEmpty() || t == null) {
-                System.out.println("Tool Unselected");
+            if (containingToolbar.getToolHeld().isEmpty() || t == null) { //unselect tool
+                //System.out.println("Tool Unselected");
                 color = baseColor;
-            } else {
-                System.out.println("Tool Selected: " + containingToolbar.getToolHeld());
+            } else { //select tool
+                //System.out.println("Tool Selected: " + containingToolbar.getToolHeld());
                 color = toolbarHighlightColor;
             }
 
@@ -130,6 +136,11 @@ public class ToolButton extends JPanel implements MouseListener {
             }
         }
     }
+
+    public int getHotkey(){
+        return hotkey;
+    }
+
 
     @Override
     public void mousePressed(MouseEvent e) {

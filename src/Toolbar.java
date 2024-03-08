@@ -29,28 +29,33 @@ public class Toolbar extends JPanel implements MouseListener, MouseMotionListene
 
     private String currentWireColor;
 
+    private static final String preset = "1234567890QWERTYUIOPADFGHJKZXCVBNM";
+    private static int hotkeyIndex = 0;
+
     public Toolbar(Grid grid) {
 
-        buttons.add(new ToolButton("Wire", wireToolImg, this));
-        buttons.add(new ToolButton("Trash", trashImage, this));
-        buttons.add(new ToolButton("Not", notImage, this));
-        buttons.add(new ToolButton("And", andImage, this));
-        buttons.add(new ToolButton("On", onImage, this));
-        buttons.add(new ToolButton("Light", lightOn, this));
-        buttons.add(new ToolButton("Switch", switchOff, this));
-        buttons.add(new ToolButton("In", inImage, this));
-        buttons.add(new ToolButton("Out", outImage, this));
-        buttons.add(new ToolButton("Import", plusImage, this));
-        buttons.add(new ToolButton("", null, this));
-        buttons.add(new ToolButton("", null, this));
-        buttons.add(new ToolButton("", null, this));
-        buttons.add(new ToolButton("", null, this));
-        buttons.add(new ToolButton("", null, this));
-        buttons.add(new ToolButton("", null, this));
-        buttons.add(new ToolButton("", null, this));
-        buttons.add(new ToolButton("", null, this));
-        buttons.add(new ToolButton("", null, this));
-        buttons.add(new ToolButton("", null, this));
+        buttons.add(new ToolButton("Wire", wireToolImg, this, newHotkey()));
+        buttons.add(new ToolButton("Trash", trashImage, this, newHotkey()));
+        buttons.add(new ToolButton("Not", notImage, this, newHotkey()));
+        buttons.add(new ToolButton("And", andImage, this, newHotkey()));
+        buttons.add(new ToolButton("On", onImage, this, newHotkey()));
+        buttons.add(new ToolButton("Light", lightOn, this, newHotkey()));
+        buttons.add(new ToolButton("Switch", switchOff, this, newHotkey()));
+        buttons.add(new ToolButton("In", inImage, this, newHotkey()));
+        buttons.add(new ToolButton("Out", outImage, this, newHotkey()));
+        buttons.add(new ToolButton("Import", plusImage, this, newHotkey()));
+        buttons.add(new ToolButton("", null, this,-1));
+        buttons.add(new ToolButton("", null, this,-1));
+        buttons.add(new ToolButton("", null, this,-1));
+        buttons.add(new ToolButton("", null, this,-1));
+        buttons.add(new ToolButton("", null, this,-1));
+        buttons.add(new ToolButton("", null, this,-1));
+        buttons.add(new ToolButton("", null, this,-1));
+        buttons.add(new ToolButton("", null, this,-1));
+        buttons.add(new ToolButton("", null, this,-1));
+        buttons.add(new ToolButton("", null, this,-1));
+
+
 
         setLayout(new GridLayout(0, 2, 0, 0));
         this.setBackground(new Color(48, 48, 48));
@@ -107,6 +112,18 @@ public class Toolbar extends JPanel implements MouseListener, MouseMotionListene
 
     public ArrayList<ToolButton> getButtons() {
         return buttons;
+    }
+
+    public static int newHotkey(){
+        int temp;
+        if (hotkeyIndex < preset.length()) {
+            temp = java.awt.event.KeyEvent.getExtendedKeyCodeForChar(preset.charAt(hotkeyIndex));
+            hotkeyIndex++;
+        }
+        else{
+            temp = -1;
+        }
+        return temp;
     }
 
     @Override
@@ -172,25 +189,30 @@ public class Toolbar extends JPanel implements MouseListener, MouseMotionListene
 
     public void processUserInput(int k) { //k is key input from kb
 
-        switch (k) {
-            case KeyEvent.VK_ESCAPE -> { //deselect wire
+        if (k == KeyEvent.VK_ESCAPE) { //deselect wire
                 if (associatedGrid.getFirstInput() != null) { //fix
                     associatedGrid.setFirstInput(null);
                 } else if (toolSelected) {
                     buttons.get(18).pseudoMouseClicked("");
                 }
             }
-            case KeyEvent.VK_1 -> buttons.get(0).pseudoMouseClicked("Wire");
-            case KeyEvent.VK_2 -> buttons.get(1).pseudoMouseClicked("Trash");
-            case KeyEvent.VK_3 -> buttons.get(2).pseudoMouseClicked("Not");
-            case KeyEvent.VK_4 -> buttons.get(3).pseudoMouseClicked("And");
-            case KeyEvent.VK_5 -> buttons.get(4).pseudoMouseClicked("On");
-            case KeyEvent.VK_6 -> buttons.get(5).pseudoMouseClicked("Light");
-            case KeyEvent.VK_7 -> buttons.get(6).pseudoMouseClicked("Switch");
-            case KeyEvent.VK_8 -> buttons.get(7).pseudoMouseClicked("In");
-            case KeyEvent.VK_9 -> buttons.get(8).pseudoMouseClicked("Out");
-
-
+        else {
+            for (ToolButton b: buttons) {
+                if (k == b.getHotkey()) {
+                    b.pseudoMouseClicked(b.getTitle());
+                }
+                /*
+                case KeyEvent.VK_1 -> buttons.get(0).pseudoMouseClicked("Wire");
+                case KeyEvent.VK_2 -> buttons.get(1).pseudoMouseClicked("Trash");
+                case KeyEvent.VK_3 -> buttons.get(2).pseudoMouseClicked("Not");
+                case KeyEvent.VK_4 -> buttons.get(3).pseudoMouseClicked("And");
+                case KeyEvent.VK_5 -> buttons.get(4).pseudoMouseClicked("On");
+                case KeyEvent.VK_6 -> buttons.get(5).pseudoMouseClicked("Light");
+                case KeyEvent.VK_7 -> buttons.get(6).pseudoMouseClicked("Switch");
+                case KeyEvent.VK_8 -> buttons.get(7).pseudoMouseClicked("In");
+                case KeyEvent.VK_9 -> buttons.get(8).pseudoMouseClicked("Out");
+                */
+            }
         }
         sting(this.getGraphics());
     }

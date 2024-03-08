@@ -341,7 +341,7 @@ public class Grid extends JPanel implements MouseListener, MouseMotionListener, 
                     try {
                         Operator customBlock = new Custom(row, col, Manager.readFile("Saves/" + associatedGUI.getToolHeld() + ".txt"), associatedGUI.getToolHeld());
                         cells.set(col, row, customBlock);
-                        System.out.println(customBlock);
+                        //System.out.println(customBlock);
                     } catch (IOException | ClassNotFoundException ex) {
                         throw new RuntimeException(ex);
                     }
@@ -361,7 +361,7 @@ public class Grid extends JPanel implements MouseListener, MouseMotionListener, 
                 }
             }
             if (wireToDelete != -1) {
-                System.out.println("Wire deleted at index: "+wireToDelete);
+                //System.out.println("Wire deleted at index: "+wireToDelete);
                 wires.remove(wireToDelete);
                 selectedWire = -1;
                 wireIsSelected = false;
@@ -389,14 +389,14 @@ public class Grid extends JPanel implements MouseListener, MouseMotionListener, 
 
     private void selectWire(int select) {
         if(selectedWire == select) {
-            System.out.println("Wire at index "+selectedWire+" unselected!");
+            //System.out.println("Wire at index "+selectedWire+" unselected!");
             wires.get(selectedWire).setSelected(false);
             selectedWire = -1;
             wireIsSelected = false;
         }
         else {
             selectedWire = select;
-            System.out.println("Wire at index "+selectedWire+" selected!");
+            //System.out.println("Wire at index "+selectedWire+" selected!");
 
             for(Wire w : wires) {
                 w.setSelected(wires.indexOf(w) == selectedWire);
@@ -545,7 +545,7 @@ public class Grid extends JPanel implements MouseListener, MouseMotionListener, 
             }
             case KeyEvent.VK_L -> {
                 try {
-                    cells = Manager.readFile("Saves/xor.txt");
+                    cells = Manager.readFile("Saves/xnor.txt");
                     for (Operator n : cells){
                         if (n instanceof Custom){
                             for (Operator input : ((Custom) n).getInputs()){
