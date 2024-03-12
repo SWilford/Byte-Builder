@@ -42,7 +42,7 @@ public class Manager {
             inputs.put(new Point(col, row), new LinkedList<>());
             for (int i = 5; i < parsed.length; i++){
                 String[] temp = parsed[i].split("\\.");
-                inputs.get(new Point(col, row)).add(new Point(Integer.parseInt(temp[0].trim().substring(1)), Integer.parseInt(temp[1].trim().substring(0, 1)))); //adds new input coord to map
+                inputs.get(new Point(col, row)).add(new Point(Integer.parseInt(temp[0].trim().substring(1)), Integer.parseInt(temp[1].trim().substring(0, temp[1].trim().indexOf(")"))))); //adds new input coord to map
             }
             if (name.contains("(")){ //custom
                 String customname = name.substring(name.indexOf("(")+1,name.indexOf(")"));
