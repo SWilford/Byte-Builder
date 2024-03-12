@@ -31,6 +31,7 @@ public class ToolButton extends JPanel implements MouseListener {
         this.setMaximumSize(new Dimension(120, 120));
         containingToolbar = to;
         this.addMouseListener(this);
+        setToolTipText(t);
     }
 
     public void toolbarHighlight() {
