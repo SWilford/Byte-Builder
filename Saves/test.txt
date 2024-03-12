@@ -1,6 +1,6 @@
 /ImageSaves/test.png
 Input, red, null, 4, 4
-Output, red, null, 11, 7
+Output, red, null, 11, 7, (9. 7)
 Input, red, null, 4, 7
 AndBlock, red, red, 7, 6, (4. 4), (4. 7)
 AndBlock, red, red, 9, 7, (7. 6), (7. 8)
