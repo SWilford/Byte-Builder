@@ -1,4 +1,5 @@
 import javax.swing.*;
+import javax.tools.Tool;
 import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
@@ -31,7 +32,9 @@ public class ToolButton extends JPanel implements MouseListener {
         this.setMaximumSize(new Dimension(120, 120));
         containingToolbar = to;
         this.addMouseListener(this);
-        setToolTipText(t);
+        if(!t.isEmpty()) {
+            setToolTipText(t);
+        }
     }
 
     public void toolbarHighlight() {
@@ -157,11 +160,13 @@ public class ToolButton extends JPanel implements MouseListener {
     public void mouseEntered(MouseEvent e) {
         highlight();
         containingToolbar.sting(this.getGraphics());
+        ToolTipManager.sharedInstance().setInitialDelay(500);
     }
 
     @Override
     public void mouseExited(MouseEvent e) {
         unHighlight();
         containingToolbar.sting(this.getGraphics());
+        ToolTipManager.sharedInstance().setInitialDelay(500);
     }
 }
