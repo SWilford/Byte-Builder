@@ -32,6 +32,7 @@ public class Grid extends JPanel implements MouseListener, MouseMotionListener, 
 
     private boolean middleClicking;
 
+
     //Image Icons
     private final ImageIcon andImage = new ImageIcon("Images/AndGate.png");
     private final ImageIcon notImage = new ImageIcon("Images/NotGate.png");
@@ -271,7 +272,7 @@ public class Grid extends JPanel implements MouseListener, MouseMotionListener, 
                         if (firstInput == null) {
                             firstInput = new Point(col, row);
                         } else {
-                            if (cells.get(col, row) instanceof OnBlock || cells.get(col, row) instanceof Switch || cells.get(col, row).isFull()) { //do nothing since start
+                            if (cells.get(col, row) instanceof OnBlock || cells.get(col, row) instanceof Switch || cells.get(col, row).isFull() || (firstInput.getX() == col && firstInput.getY() == row)) { //do nothing since start
                                 break;
                             }
                             if (cells.get(col, row) instanceof Custom) {
@@ -528,43 +529,44 @@ public class Grid extends JPanel implements MouseListener, MouseMotionListener, 
     }
 
     public void processUserInput(int k) { //k is key input from kb
-
         switch (k) {
             case KeyEvent.VK_S -> {
-                FileExplorer fileExplorer = new FileExplorer();
-                File file = fileExplorer.selectFile(false);
-                if(file.getName().isEmpty()) {
-                    return;
-                }
-                String image = "/"+file.getPath().replace("\\", "/");
+                if (Driver.isControl) {
+                    FileExplorer fileExplorer = new FileExplorer();
+                    File file = fileExplorer.selectFile(false);
+                    if (file.getName().isEmpty()) {
+                        return;
+                    }
+                    String image = "/" + file.getPath().replace("\\", "/");
 
-                try {
-                    Manager.writeToFile(cells, "Saves/untitled.txt", image);
+                    try {
+                        Manager.writeToFile(cells, "Saves/untitled.txt", image);
+                    } catch (Exception ignored) {}
                 }
-                catch(Exception ignored){}
             }
             case KeyEvent.VK_L -> {
                 try {
-                    FileExplorer fileExplorer = new FileExplorer();
-                    File file = fileExplorer.selectFile(true);
-                    if(file.getName().isEmpty()) {
-                        return;
-                    }
-                    cells = Manager.readFile("Saves/"+file.getName());
-                    for (Operator n : cells){
-                        if (n instanceof Custom){
-                            for (Operator input : ((Custom) n).getInputs()){
-                                if(input.getPrev1() != null) {
-                                    wires.add(new Wire(input.getPrev1().getCol(), input.getPrev1().getRow(), (int) n.getCol(), (int) n.getRow(), input.getColor()));
-                                }//wires.add(new Wire(c1, r1, c2, r2, currentWireColor)
-                            }
+                    if (Driver.isControl) {
+                        FileExplorer fileExplorer = new FileExplorer();
+                        File file = fileExplorer.selectFile(true);
+                        if (file.getName().isEmpty()) {
+                            return;
                         }
-                        else {
-                            if (n.getPrev1() != null) {
-                                wires.add(new Wire(n.getPrev1().getCol(), n.getPrev1().getRow(), (int) n.getCol(), (int) n.getRow(), n.getColor()));
-                            }
-                            if (n instanceof Operator2I && ((Operator2I) n).getPrev2() != null){
-                                wires.add(new Wire(((Operator2I) n).getPrev2().getCol(), ((Operator2I) n).getPrev2().getRow(), (int) n.getCol(), (int) n.getRow(), ((Operator2I) n).getColor2()));
+                        cells = Manager.readFile("Saves/" + file.getName());
+                        for (Operator n : cells) {
+                            if (n instanceof Custom) {
+                                for (Operator input : ((Custom) n).getInputs()) {
+                                    if (input.getPrev1() != null) {
+                                        wires.add(new Wire(input.getPrev1().getCol(), input.getPrev1().getRow(), (int) n.getCol(), (int) n.getRow(), input.getColor()));
+                                    }//wires.add(new Wire(c1, r1, c2, r2, currentWireColor)
+                                }
+                            } else {
+                                if (n.getPrev1() != null) {
+                                    wires.add(new Wire(n.getPrev1().getCol(), n.getPrev1().getRow(), (int) n.getCol(), (int) n.getRow(), n.getColor()));
+                                }
+                                if (n instanceof Operator2I && ((Operator2I) n).getPrev2() != null) {
+                                    wires.add(new Wire(((Operator2I) n).getPrev2().getCol(), ((Operator2I) n).getPrev2().getRow(), (int) n.getCol(), (int) n.getRow(), ((Operator2I) n).getColor2()));
+                                }
                             }
                         }
                     }

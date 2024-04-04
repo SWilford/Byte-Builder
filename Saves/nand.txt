@@ -1,0 +1,6 @@
+/ImageSaves/NandImage.png
+AndBlock, green, blue, 7, 9, (5. 8), (5. 10)
+Input, red, null, 5, 8
+Input, red, null, 5, 10
+Output, red, null, 10, 9, (8. 9)
+NotBlock, red, null, 8, 9, (7. 9)

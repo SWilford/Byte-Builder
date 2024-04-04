@@ -29,7 +29,7 @@ public class Toolbar extends JPanel implements MouseListener, MouseMotionListene
 
     private String currentWireColor;
 
-    private static final String preset = "1234567890QWERTYUIOPADFGHJKZXCVBNM";
+    private static final String preset = "1234567890qwertyuiopasdfghjklzxcvbnm";
     private static int hotkeyIndex = 0;
 
     public Toolbar(Grid grid) {
