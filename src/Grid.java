@@ -6,11 +6,16 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.Stack;
 
 public class Grid extends JPanel implements MouseListener, MouseMotionListener, MouseWheelListener {
 
     private BuilderGUI associatedGUI;
     private SparseMatrix<Operator> cells = new SparseMatrix<>();
+
+    private Stack<changeMessage> toUndo = new Stack<>();
+    private Stack<changeMessage> toRedo = new Stack<>();
+
     public ArrayList<Wire> wires = new ArrayList<>(); // stores wires to be drawn
     private boolean mouseOverWire;
     public String currentWireColor;
@@ -82,6 +87,8 @@ public class Grid extends JPanel implements MouseListener, MouseMotionListener, 
     public Point getFirstInput() {
         return firstInput;
     }
+
+    public Stack<wireMessage> buffer = new Stack<>();
 
     public void display(Graphics g) {
 
@@ -176,6 +183,8 @@ public class Grid extends JPanel implements MouseListener, MouseMotionListener, 
 
             if(cells.get(w.getX1(), w.getY1()) == null || cells.get(w.getX2(), w.getY2()) == null) {
                 wiresDelete.add(w);
+                wireMessage message = new wireMessage(w);
+                buffer.push(message);
             }
             else {
                 w.drawWire(g2, this, cells);
@@ -260,10 +269,16 @@ public class Grid extends JPanel implements MouseListener, MouseMotionListener, 
         int col = (int)Math.floor(toXCoord(e.getX())/cellWidth);
         int row = (int)Math.floor(toYCoord(e.getY())/cellWidth);
         if(!mouseOverWire) {
+            if(!associatedGUI.getToolHeld().equals("Wire")) {
+                cellMessage cm = new cellMessage(cells.get(col, row), new Point(col, row));
+                toUndo.push(cm);
+            }
+            Operator test = cells.get(0, 0);
             switch (associatedGUI.getToolHeld()) {
                 case "" -> {
                     if (cells.get(col, row) instanceof Switch) {
                         ((Switch) (cells.get(col, row))).switchInput();
+                        toUndo.pop(); //makes it so flicking the switch doesn't generate states of the grid that need to be undone/redone
                     }
                     break;
                 }
@@ -275,6 +290,7 @@ public class Grid extends JPanel implements MouseListener, MouseMotionListener, 
                             if (cells.get(col, row) instanceof OnBlock || cells.get(col, row) instanceof Switch || cells.get(col, row).isFull() || (firstInput.getX() == col && firstInput.getY() == row)) { //do nothing since start
                                 break;
                             }
+
                             if (cells.get(col, row) instanceof Custom) {
                                 Operator temp = ((Custom) (cells.get(col, row))).getFirstEmpty();
                                 if (temp != null) {
@@ -308,6 +324,8 @@ public class Grid extends JPanel implements MouseListener, MouseMotionListener, 
                 }
                 case "Trash" -> {
                     if (cells.get(col, row) != null) {
+                        cellMessage message = new cellMessage(cells.get(col, row), new Point(col, row));
+                        toUndo.push(message);
                         deletePointersTo(cells.get(col, row));
                         cells.set(col, row, null);
                     }
@@ -351,7 +369,7 @@ public class Grid extends JPanel implements MouseListener, MouseMotionListener, 
         }
         if(!wires.isEmpty()) {
             for(Wire w : wires) {
-                if (w.contains(cursorX, cursorY) && !associatedGUI.getToolHeld().equals("Trash")) {
+                if (w.contains(cursorX, cursorY) && !associatedGUI.getToolHeld().equals("Trash")) { //select wire
                     selectWire(wires.indexOf(w));
                 }
                 if (w.contains(cursorX, cursorY) && associatedGUI.getToolHeld().equals("Trash")) {
@@ -373,6 +391,114 @@ public class Grid extends JPanel implements MouseListener, MouseMotionListener, 
 
         repaint();
     }
+
+
+
+    private void undo() {
+        changeMessage message = toUndo.pop();
+        if(message instanceof cellMessage) {
+            int xPoint = ((cellMessage) message).getPoint().x;
+            int yPoint = ((cellMessage) message).getPoint().y;
+            cellMessage redoMessage = new cellMessage(cells.get(xPoint, yPoint), ((cellMessage) message).getPoint());
+            toRedo.push(redoMessage);
+            cells.set(xPoint, yPoint, ((cellMessage) message).getOperator());
+            if(!buffer.isEmpty()) {
+                wireMessage msg = buffer.pop();
+                Wire theWire = msg.getWire();
+                wires.add(theWire);
+                int clm1 = (int)Math.floor(toXCoord(theWire.getxOne())/cellWidth);
+                int rw1 = (int)Math.floor(toYCoord(theWire.getyOne())/cellWidth);
+                int clm2 = (int)Math.floor(toXCoord(theWire.getxTwo())/cellWidth);
+                int rw2 = (int)Math.floor(toYCoord(theWire.getyTwo())/cellWidth);
+                if(cells.get(clm2, rw2) instanceof Operator2I) { //some sort of error in here
+                    if(cells.get(clm2, rw2).getPrev1() == null) {
+                        cells.get(clm2, rw2).setPrev1(cells.get(clm1, rw1));
+                    }
+                    else {
+                        ((Operator2I) cells.get(clm2, rw2)).setPrev2(cells.get(clm1, rw1));
+                    }
+                }
+                else {
+                    cells.get(clm2, rw2).setPrev1(cells.get(clm1, rw1));
+                }
+                if(xPoint == clm1 && yPoint == rw1) {
+                    buffer.add(new wireMessage(theWire));
+                }
+
+
+            }
+        }
+        else if(message instanceof wireMessage) {
+            Wire theWire = ((wireMessage) message).getWire();
+            wireMessage redoMessage = new wireMessage(theWire);
+            toRedo.push(redoMessage);
+            int index = wires.indexOf(theWire);
+            int clm = (int)Math.floor(toXCoord(theWire.getxOne())/cellWidth);
+            int rw = (int)Math.floor(toYCoord(theWire.getyOne())/cellWidth);
+            deletePointersTo(cells.get(clm, rw));
+            wires.remove(index);
+        }
+
+    }
+
+    private void redo() {
+        changeMessage message = toRedo.pop();
+        if(message instanceof cellMessage) {
+            int xPoint = ((cellMessage) message).getPoint().x;
+            int yPoint = ((cellMessage) message).getPoint().y;
+            cellMessage undoMessage = new cellMessage(cells.get(xPoint, yPoint), ((cellMessage) message).getPoint());
+            toUndo.push(undoMessage);
+            cells.set(xPoint, yPoint, ((cellMessage) message).getOperator());
+            if(!buffer.isEmpty()) {
+                Wire theWire = buffer.pop().getWire();
+                int clm1 = (int)Math.floor(toXCoord(theWire.getxOne())/cellWidth);
+                int rw1 = (int)Math.floor(toYCoord(theWire.getyOne())/cellWidth);
+                int clm2 = (int)Math.floor(toXCoord(theWire.getxTwo())/cellWidth);
+                int rw2 = (int)Math.floor(toYCoord(theWire.getyTwo())/cellWidth);
+                Operator cell2 = cells.get(clm2, rw2);
+                if(cell2 instanceof Operator2I) {
+                    if(cell2.getPrev1().getRow() == clm1 && cell2.getPrev1().getCol() == rw1) {
+                        cell2.setPrev1(null);
+                    }
+                    if(((Operator2I) cell2).getPrev2().getRow() == clm1 && ((Operator2I) cell2).getPrev2().getCol() == rw1) {
+                        cell2.setPrev1(null);
+                    }
+                }
+                else {
+                    if(cell2.getPrev1().getRow() == clm1 && cell2.getPrev1().getCol() == rw1) {
+                        cell2.setPrev1(null);
+                    }
+                }
+            }
+        }
+        else if(message instanceof wireMessage) {
+            Wire theWire = ((wireMessage) message).getWire();
+            wires.add(theWire);
+            int clm1 = (int)Math.floor(toXCoord(theWire.getxOne())/cellWidth);
+            int rw1 = (int)Math.floor(toYCoord(theWire.getyOne())/cellWidth);
+            int clm2 = (int)Math.floor(toXCoord(theWire.getxTwo())/cellWidth);
+            int rw2 = (int)Math.floor(toYCoord(theWire.getyTwo())/cellWidth);
+            if(cells.get(clm2, rw2) instanceof Operator2I) {
+                if(cells.get(clm2, rw2).getPrev1() == null) {
+                    cells.get(clm2, rw2).setPrev1(cells.get(clm1, rw1));
+                }
+                else {
+                    ((Operator2I) cells.get(clm2, rw2)).setPrev2(cells.get(clm1, rw1));
+                }
+            }
+            else {
+                cells.get(clm2, rw2).setPrev1(cells.get(clm1, rw1));
+            }
+
+            wireMessage undoMessage = new wireMessage(theWire);
+            toUndo.push(undoMessage);
+
+
+
+            //still need to handle when wire color is changed and when wires are deleted !!!!!!!! also still some bugs
+        }
+    }
+
 
     private void drawTriangle(Graphics2D g, int x1, int y1, int x2, int y2){
         double angle = Math.atan2(y2-y1, x2-x1);
@@ -434,7 +560,10 @@ public class Grid extends JPanel implements MouseListener, MouseMotionListener, 
     }
 
     private void createWire(int c1, int r1, int c2, int r2) {
-        wires.add(new Wire(c1, r1, c2, r2, currentWireColor));
+        Wire wire = new Wire(c1, r1, c2, r2, currentWireColor);
+        wires.add(wire);
+        wireMessage message = new wireMessage(wire);
+        toUndo.push(message);
     }
 
     public int getCellWidth() {
@@ -574,7 +703,20 @@ public class Grid extends JPanel implements MouseListener, MouseMotionListener, 
                     throw new RuntimeException(e);
                 }
             }
+            case KeyEvent.VK_Z -> {
+                if(Driver.isControl && !toUndo.isEmpty()) {
+                    undo();
+                }
+            }
+            case KeyEvent.VK_Y -> {
+                if(Driver.isControl && !toRedo.isEmpty()) {
+                    redo();
+                }
+            }
         }
         repaint();
     }
+
 }
+
+

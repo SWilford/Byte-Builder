@@ -1,8 +1,9 @@
 import java.awt.*;
-import java.util.HashMap;
-import java.util.Iterator;
+import java.util.*;
+
 
 public class SparseMatrix<anyType> implements Iterable<anyType> {
+
 
     HashMap<Point, anyType> map = new HashMap<>();
 
@@ -24,4 +25,7 @@ public class SparseMatrix<anyType> implements Iterable<anyType> {
     public Iterator<anyType> iterator() {
         return map.values().iterator();
     }
+
+
+
 }
