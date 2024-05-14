@@ -424,8 +424,6 @@ public class Grid extends JPanel implements MouseListener, MouseMotionListener, 
                 if(xPoint == clm1 && yPoint == rw1) {
                     buffer.add(new wireMessage(theWire));
                 }
-
-
             }
         }
         else if(message instanceof wireMessage) {
@@ -438,7 +436,6 @@ public class Grid extends JPanel implements MouseListener, MouseMotionListener, 
             deletePointersTo(cells.get(clm, rw));
             wires.remove(index);
         }
-
     }
 
     private void redo() {
