@@ -1,8 +1,0 @@
-/ImageSaves/OrImage.png
-NotBlock, red, null, 4, 4, (3. 4)
-Input, red, null, 3, 5
-NotBlock, red, null, 5, 4, (5. 5)
-Input, red, null, 3, 4
-AndBlock, red, red, 5, 5, (4. 4), (4. 5)
-Output, red, null, 6, 4, (5. 4)
-NotBlock, red, null, 4, 5, (3. 5)

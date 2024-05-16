@@ -11,6 +11,8 @@ import java.util.Stack;
 public class Grid extends JPanel implements MouseListener, MouseMotionListener, MouseWheelListener {
 
     private BuilderGUI associatedGUI;
+
+    JFrame tutorial = new JFrame();
     private SparseMatrix<Operator> cells = new SparseMatrix<>();
 
     private Stack<changeMessage> toUndo = new Stack<>();
@@ -79,6 +81,34 @@ public class Grid extends JPanel implements MouseListener, MouseMotionListener, 
         middleClicking = false;
 
         currentWireColor = associatedGUI.getCurrentWireColor();
+
+        //tutorial stuff lol
+        JLabel tutorialtext = new JLabel("<html>Welcome to Byte Builder!" +
+                "<br>This is a game where software emulates hardware, and you can design your own digital circuits!" +
+                "<br>You start out with very basic components, and from here you can build even more complex components! " +
+                "<br>First you should get to know what you have. As you can see, you start with wires, a delete tool, NOT, AND, a power supply, a light-bulb, a switch, and INPUT and OUTPUT (these two are very handy!)" +
+                "<br>As a starter, you can start by making a simple AND circuit, consisting of two switches connecting to an AND gate, then to a light-bulb! (If you don't know which is which, it tells you on hover)" +
+                "<br><br>Now by knowing the basics of the blocks at your disposal and how wires work, you are set to make your first custom block!" +
+                "<br>Lets make an OR circuit, meaning that the signal goes through if either of its inputs are on." +
+                "<br>Delete your blocks using the delete tool. Then start with two purple INPUTS, every custom block needs inputs. From there, connect each input to its own NOT, respectively. Then, connect those NOTs to a single AND. After that, connect that AND to a single NOT." +
+                "<br>Finally, connect that NOT to a single red OUTPUT, every custom block needs one output. Now you're done! Let's save our work." +
+                "<br>To save our work, start by pressing CTRL+S on your keyboard. From there, choose a picture to go with your OR block, then choose a name and save it." +
+                "<br>Now its saved! Let's try it out. Delete what you have on the board currently, click the plus button on your toolbar, and choose the OR with the title you gave it." +
+                "<br>Now place it! Hook it up to two switches and a light-bulb and see if it lights up! If you followed the steps correctly, it should light up." +
+                "<br>At this point, you are on your way to becoming a pro! There are some limitations to this program however, custom blocks cannot have two outputs so sorry about that!" +
+                "<br>Have fun!" +
+                "<br><br>Press CTRL+T to hide/view this message.</html>");
+        tutorialtext.setFont(new Font("Roboto", Font.PLAIN, 14));
+        tutorialtext.setForeground(Color.WHITE);
+        tutorialtext.setOpaque(true);
+        tutorialtext.setBackground(Color.DARK_GRAY);
+        tutorial.add(tutorialtext);
+        tutorial.pack();
+        tutorial.setAlwaysOnTop(true);
+        tutorial.setPreferredSize(new Dimension(250, 200));
+        Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+        tutorial.setLocation((int) screenSize.getWidth()/2, (int) screenSize.getHeight()/2);
+        tutorial.setVisible(true);
     }
 
     public void setFirstInput(Point p) {
@@ -708,6 +738,12 @@ public class Grid extends JPanel implements MouseListener, MouseMotionListener, 
             case KeyEvent.VK_Y -> {
                 if(Driver.isControl && !toRedo.isEmpty()) {
                     redo();
+                }
+            }
+            case KeyEvent.VK_T -> {
+                if (Driver.isControl) {
+                    System.out.println("tutorial");
+                    tutorial.setVisible(!tutorial.isVisible());
                 }
             }
         }
