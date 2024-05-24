@@ -19,6 +19,8 @@ public class FileManager {
         return size;
     }
 
+
+
     public static LinkedList<Operator> readFile(String fileName) throws IOException, ClassNotFoundException { //returns array of operators that have their connections
         LinkedList<Operator> arr = new LinkedList<>();
         LinkedList<String[]> inputs = new LinkedList<>();
@@ -42,7 +44,7 @@ public class FileManager {
 
             if (thing[0].contains("(")){ //custom
                 String name = thing[0].substring(thing[0].indexOf("(")+1,thing[0].indexOf(")"));
-                arr.add(new Custom(row, col, FileManager.readFile("Saves/" + name + ".txt"), name));
+                arr.add(new Custom(row, col, Manager.readFile("Saves/" + name + ".txt"), name));
             }
             else {
                 switch (thing[0].trim()) {
@@ -81,7 +83,9 @@ public class FileManager {
 
     public static void writeToFile(LinkedList<Operator> array, String filename) throws IOException
     {
+        String imagePath = "/ImageSaves/OrImage.png"; //Will be actual path to image
         System.setOut(new PrintStream(new FileOutputStream(filename)));
+        System.out.print(imagePath);
         for(int i = 0; i < array.size(); i++){
             Operator op = array.get(i);
             String n = op.getClass().getName();

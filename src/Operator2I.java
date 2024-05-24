@@ -30,6 +30,10 @@ public abstract class Operator2I extends Operator{
     }
     public abstract boolean getOutput();
 
+    public String toString(){
+        return this.getClass().getName() + ", " + color + ", " + color2 + ", " + col + ", " + row;
+    }
+
     public void setColor2 (String c) {
         color2 = c;
     }

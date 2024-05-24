@@ -12,6 +12,12 @@ public class AndBlock extends Operator2I{
         if (previous1 == null || previous2 == null){
             return false;
         }
-        return previous1.getOutput() && previous2.getOutput();
+        int temp = (int)(Math.random() * (1 - 0 + 1) + 0); //either 0 or 1
+        if (temp == 0){
+            return previous1.getOutput() && previous2.getOutput();
+        }
+        else{
+            return previous2.getOutput() && previous1.getOutput();
+        }
     }
 }

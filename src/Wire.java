@@ -1,5 +1,7 @@
 import java.awt.*;
 import java.awt.geom.Line2D;
+import java.util.LinkedList;
+import java.util.ArrayList;
 
 public class Wire {
     private int x1;
@@ -192,15 +194,21 @@ public class Wire {
         yTwo = grid.toYPosOnWindow(y2 * cellWidth)+max/2;
 
         if(cells.get(x2, y2) instanceof Operator2I) {
-            if((cells.get(x2, y2).getPrev1() == cells.get(x1, y1))) { //First input
+            if(cells.get(x2, y2).getPrev1() == cells.get(x1, y1)) { //First input
                 yTwo = grid.toYPosOnWindow(y2* cellWidth)+(max/3);
             }
             else { //Second input
                 yTwo = grid.toYPosOnWindow(y2* cellWidth)+(max/3*2);
             }
         }
-        else if(cells.get(x1, y1) instanceof Custom) {
+        else if(cells.get(x2, y2) instanceof Custom) {
             //else if Custom, find the amount of inputs and put it in the first open one
+            ArrayList<Operator> temp = ((Custom) cells.get(x2, y2)).getInputs();
+            for (int i = 0; i < temp.size(); i++){
+                if (temp.get(i).getPrev1() == cells.get(x1, y1)){
+                    yTwo = grid.toYPosOnWindow(y2* cellWidth)+(max/(temp.size()+1) * (i + 1));
+                }
+            }
         }
 
         //eventually will need to have outputs if blocks have multiple outputs
@@ -239,4 +247,6 @@ public class Wire {
     public void setMouseCovering(Boolean b) {
         mouseCovering = b;
     }
+
+
 }

@@ -5,13 +5,13 @@ import java.awt.event.*;
 public class BuilderGUI extends JPanel implements MouseListener, MouseMotionListener, MouseWheelListener, ComponentListener{
 
     Toolbar toolbar;
-
+    Grid grid;
     String currentWireColor;
 
     public BuilderGUI() {
         setLayout(new BorderLayout(0, 0));
         currentWireColor = "red";
-        Grid grid = new Grid(this);
+        grid = new Grid(this);
         toolbar = new Toolbar(grid);
         this.add(grid, BorderLayout.CENTER);
         JScrollPane blank = new JScrollPane(toolbar, JScrollPane.VERTICAL_SCROLLBAR_NEVER, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);

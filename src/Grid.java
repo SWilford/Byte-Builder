@@ -4,12 +4,20 @@ import java.awt.event.*;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.Stack;
 
 public class Grid extends JPanel implements MouseListener, MouseMotionListener, MouseWheelListener {
 
     private BuilderGUI associatedGUI;
-    private final SparseMatrix<Operator> cells = new SparseMatrix<>();
+
+    JFrame tutorial = new JFrame();
+    private SparseMatrix<Operator> cells = new SparseMatrix<>();
+
+    private Stack<changeMessage> toUndo = new Stack<>();
+    private Stack<changeMessage> toRedo = new Stack<>();
+
     public ArrayList<Wire> wires = new ArrayList<>(); // stores wires to be drawn
     private boolean mouseOverWire;
     public String currentWireColor;
@@ -30,6 +38,7 @@ public class Grid extends JPanel implements MouseListener, MouseMotionListener, 
     private double x, y, scale;
 
     private boolean middleClicking;
+
 
     //Image Icons
     private final ImageIcon andImage = new ImageIcon("Images/AndGate.png");
@@ -72,6 +81,35 @@ public class Grid extends JPanel implements MouseListener, MouseMotionListener, 
         middleClicking = false;
 
         currentWireColor = associatedGUI.getCurrentWireColor();
+
+        //tutorial stuff lol
+        JLabel tutorialtext = new JLabel("<html>Welcome to Byte Builder!" +
+                "<br>This is a game where software emulates hardware, and you can design your own digital circuits!" +
+                "<br>You start out with very basic components, and from here you can build even more complex components! " +
+                "<br>First you should get to know what you have. As you can see, you start with wires, a delete tool, NOT, AND, a power supply, a light-bulb, a switch, and INPUT and OUTPUT (these two are very handy!)" +
+                "<br>As a starter, you can start by making a simple AND circuit, consisting of two switches connecting to an AND gate, then to a light-bulb! (If you don't know which is which, it tells you on hover)" +
+                "<br><br>Now by knowing the basics of the blocks at your disposal and how wires work, you are set to make your first custom block!" +
+                "<br>Lets make an OR circuit, meaning that the signal goes through if either of its inputs are on." +
+                "<br>Delete your blocks using the delete tool. Then start with two purple INPUTS, every custom block needs inputs. From there, connect each input to its own NOT, respectively. Then, connect those NOTs to a single AND. After that, connect that AND to a single NOT." +
+                "<br>Finally, connect that NOT to a single red OUTPUT, every custom block needs one output. Now you're done! Let's save our work." +
+                "<br>To save our work, start by pressing CTRL+S on your keyboard. From there, choose a picture to go with your OR block, then choose a name and save it." +
+                "<br>Now its saved! Let's try it out. Delete what you have on the board currently, click the plus button on your toolbar, and choose the OR with the title you gave it." +
+                "<br>Now place it! Hook it up to two switches and a light-bulb and see if it lights up! If you followed the steps correctly, it should light up." +
+                "<br>At this point, you are on your way to becoming a pro! There are some limitations to this program however, custom blocks cannot have two outputs so sorry about that!" +
+                "<br>Have fun!" +
+                "<br><br>Press CTRL+T to hide/view this message.</html>");
+        tutorialtext.setFont(new Font("Roboto", Font.PLAIN, 14));
+        tutorialtext.setForeground(Color.WHITE);
+        tutorialtext.setOpaque(true);
+        tutorialtext.setBackground(Color.DARK_GRAY);
+        tutorial.add(tutorialtext);
+        tutorial.pack();
+        tutorial.setTitle("Tutorial");
+        tutorial.setAlwaysOnTop(true);
+        tutorial.setPreferredSize(new Dimension(250, 200));
+        Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+        tutorial.setLocation((int) screenSize.getWidth()/2, (int) screenSize.getHeight()/2);
+        tutorial.setVisible(true);
     }
 
     public void setFirstInput(Point p) {
@@ -80,6 +118,8 @@ public class Grid extends JPanel implements MouseListener, MouseMotionListener, 
     public Point getFirstInput() {
         return firstInput;
     }
+
+    public Stack<wireMessage> buffer = new Stack<>();
 
     public void display(Graphics g) {
 
@@ -149,6 +189,14 @@ public class Grid extends JPanel implements MouseListener, MouseMotionListener, 
                 if(o instanceof Output) {
                     g.drawImage(outImage.getImage(), toXPosOnWindow(o.getCol() * cellWidth), toYPosOnWindow(o.getRow() * cellWidth), toXPosOnWindow(cellWidth + x), toYPosOnWindow(cellWidth + y), null);
                 }
+                if(o instanceof Custom){
+                    try {
+                        g.drawImage((new ImageIcon(Manager.getImage("Saves/" + ((Custom) o).getName() + ".txt").substring(1))).getImage(),
+                                toXPosOnWindow(o.getCol() * cellWidth), toYPosOnWindow(o.getRow() * cellWidth), toXPosOnWindow(cellWidth + x), toYPosOnWindow(cellWidth + y), null);
+                    } catch (IOException | ClassNotFoundException e) {
+                        throw new RuntimeException(e);
+                    }
+                }
             }
         }
 
@@ -166,6 +214,8 @@ public class Grid extends JPanel implements MouseListener, MouseMotionListener, 
 
             if(cells.get(w.getX1(), w.getY1()) == null || cells.get(w.getX2(), w.getY2()) == null) {
                 wiresDelete.add(w);
+                wireMessage message = new wireMessage(w);
+                buffer.push(message);
             }
             else {
                 w.drawWire(g2, this, cells);
@@ -250,20 +300,28 @@ public class Grid extends JPanel implements MouseListener, MouseMotionListener, 
         int col = (int)Math.floor(toXCoord(e.getX())/cellWidth);
         int row = (int)Math.floor(toYCoord(e.getY())/cellWidth);
         if(!mouseOverWire) {
+            if(!associatedGUI.getToolHeld().equals("Wire")) {
+                cellMessage cm = new cellMessage(cells.get(col, row), new Point(col, row));
+                toUndo.push(cm);
+            }
+            Operator test = cells.get(0, 0);
             switch (associatedGUI.getToolHeld()) {
                 case "" -> {
                     if (cells.get(col, row) instanceof Switch) {
                         ((Switch) (cells.get(col, row))).switchInput();
+                        toUndo.pop(); //makes it so flicking the switch doesn't generate states of the grid that need to be undone/redone
                     }
+                    break;
                 }
                 case "Wire" -> {
                     if (cells.get(col, row) != null) {
                         if (firstInput == null) {
                             firstInput = new Point(col, row);
                         } else {
-                            if (cells.get(col, row) instanceof OnBlock || cells.get(col, row) instanceof Switch || cells.get(col, row).isFull()) { //do nothing since start
+                            if (cells.get(col, row) instanceof OnBlock || cells.get(col, row) instanceof Switch || cells.get(col, row).isFull() || (firstInput.getX() == col && firstInput.getY() == row)) { //do nothing since start
                                 break;
                             }
+
                             if (cells.get(col, row) instanceof Custom) {
                                 Operator temp = ((Custom) (cells.get(col, row))).getFirstEmpty();
                                 if (temp != null) {
@@ -283,46 +341,66 @@ public class Grid extends JPanel implements MouseListener, MouseMotionListener, 
                             updateWireToCursor();
                         }
                     }
+                    break;
                 }
                 case "Not" -> {
-                    Operator notBlock = new NotBlock(row, col, null); //(row, col) = (y, x)  <---- !!!
+                    Operator notBlock = new NotBlock(row, col, null); //(row, col) = (y, x)  <---- !!!!!!!!!!
                     cells.set(col, row, notBlock);
+                    break;
                 }
                 case "And" -> {
                     Operator andBlock = new AndBlock(row, col, null, null);
                     cells.set(col, row, andBlock);
+                    break;
                 }
                 case "Trash" -> {
                     if (cells.get(col, row) != null) {
+                        cellMessage message = new cellMessage(cells.get(col, row), new Point(col, row));
+                        toUndo.push(message);
                         deletePointersTo(cells.get(col, row));
                         cells.set(col, row, null);
                     }
+                    break;
                 }
                 case "On" -> {
                     Operator onBlock = new OnBlock(row, col);
                     cells.set(col, row, onBlock);
+                    break;
                 }
                 case "Light" -> {
                     Operator lt = new Light(row, col, null);
                     cells.set(col, row, lt);
+                    break;
                 }
                 case "Switch" -> {
                     Operator swi = new Switch(row, col);
                     cells.set(col, row, swi);
+                    break;
                 }
                 case "In" -> {
                     Operator inBlock = new Input(row, col);
                     cells.set(col, row, inBlock);
+                    break;
                 }
                 case "Out" -> {
                     Operator outBlock = new Output(row, col, null);
                     cells.set(col, row, outBlock);
+                    break;
+                }
+                default -> { //place custom object!
+                    try {
+                        Operator customBlock = new Custom(row, col, Manager.readFile("Saves/" + associatedGUI.getToolHeld() + ".txt"), associatedGUI.getToolHeld());
+                        cells.set(col, row, customBlock);
+                        //System.out.println(customBlock);
+                    } catch (IOException | ClassNotFoundException ex) {
+                        throw new RuntimeException(ex);
+                    }
                 }
             }
         }
         if(!wires.isEmpty()) {
             for(Wire w : wires) {
-                if (w.contains(cursorX, cursorY) && !associatedGUI.getToolHeld().equals("Trash")) {
+                if (w.contains(cursorX, cursorY) && !associatedGUI.getToolHeld().equals("Trash")) { //select wire
                     selectWire(wires.indexOf(w));
                 }
                 if (w.contains(cursorX, cursorY) && associatedGUI.getToolHeld().equals("Trash")) {
@@ -333,7 +411,7 @@ public class Grid extends JPanel implements MouseListener, MouseMotionListener, 
                 }
             }
             if (wireToDelete != -1) {
-                System.out.println("Wire deleted at index: "+wireToDelete);
+                //System.out.println("Wire deleted at index: "+wireToDelete);
                 wires.remove(wireToDelete);
                 selectedWire = -1;
                 wireIsSelected = false;
@@ -344,6 +422,111 @@ public class Grid extends JPanel implements MouseListener, MouseMotionListener, 
 
         repaint();
     }
+
+
+
+    private void undo() {
+        changeMessage message = toUndo.pop();
+        if(message instanceof cellMessage) {
+            int xPoint = ((cellMessage) message).getPoint().x;
+            int yPoint = ((cellMessage) message).getPoint().y;
+            cellMessage redoMessage = new cellMessage(cells.get(xPoint, yPoint), ((cellMessage) message).getPoint());
+            toRedo.push(redoMessage);
+            cells.set(xPoint, yPoint, ((cellMessage) message).getOperator());
+            if(!buffer.isEmpty()) {
+                wireMessage msg = buffer.pop();
+                Wire theWire = msg.getWire();
+                wires.add(theWire);
+                int clm1 = (int)Math.floor(toXCoord(theWire.getxOne())/cellWidth);
+                int rw1 = (int)Math.floor(toYCoord(theWire.getyOne())/cellWidth);
+                int clm2 = (int)Math.floor(toXCoord(theWire.getxTwo())/cellWidth);
+                int rw2 = (int)Math.floor(toYCoord(theWire.getyTwo())/cellWidth);
+                if(cells.get(clm2, rw2) instanceof Operator2I) { //some sort of error in here
+                    if(cells.get(clm2, rw2).getPrev1() == null) {
+                        cells.get(clm2, rw2).setPrev1(cells.get(clm1, rw1));
+                    }
+                    else {
+                        ((Operator2I) cells.get(clm2, rw2)).setPrev2(cells.get(clm1, rw1));
+                    }
+                }
+                else {
+                    cells.get(clm2, rw2).setPrev1(cells.get(clm1, rw1));
+                }
+                if(xPoint == clm1 && yPoint == rw1) {
+                    buffer.add(new wireMessage(theWire));
+                }
+            }
+        }
+        else if(message instanceof wireMessage) {
+            Wire theWire = ((wireMessage) message).getWire();
+            wireMessage redoMessage = new wireMessage(theWire);
+            toRedo.push(redoMessage);
+            int index = wires.indexOf(theWire);
+            int clm = (int)Math.floor(toXCoord(theWire.getxOne())/cellWidth);
+            int rw = (int)Math.floor(toYCoord(theWire.getyOne())/cellWidth);
+            deletePointersTo(cells.get(clm, rw));
+            wires.remove(index);
+        }
+    }
+
+    private void redo() {
+        changeMessage message = toRedo.pop();
+        if(message instanceof cellMessage) {
+            int xPoint = ((cellMessage) message).getPoint().x;
+            int yPoint = ((cellMessage) message).getPoint().y;
+            cellMessage undoMessage = new cellMessage(cells.get(xPoint, yPoint), ((cellMessage) message).getPoint());
+            toUndo.push(undoMessage);
+            cells.set(xPoint, yPoint, ((cellMessage) message).getOperator());
+            if(!buffer.isEmpty()) {
+                Wire theWire = buffer.pop().getWire();
+                int clm1 = (int)Math.floor(toXCoord(theWire.getxOne())/cellWidth);
+                int rw1 = (int)Math.floor(toYCoord(theWire.getyOne())/cellWidth);
+                int clm2 = (int)Math.floor(toXCoord(theWire.getxTwo())/cellWidth);
+                int rw2 = (int)Math.floor(toYCoord(theWire.getyTwo())/cellWidth);
+                Operator cell2 = cells.get(clm2, rw2);
+                if(cell2 instanceof Operator2I) {
+                    if(cell2.getPrev1().getRow() == clm1 && cell2.getPrev1().getCol() == rw1) {
+                        cell2.setPrev1(null);
+                    }
+                    if(((Operator2I) cell2).getPrev2().getRow() == clm1 && ((Operator2I) cell2).getPrev2().getCol() == rw1) {
+                        cell2.setPrev1(null);
+                    }
+                }
+                else {
+                    if(cell2.getPrev1().getRow() == clm1 && cell2.getPrev1().getCol() == rw1) {
+                        cell2.setPrev1(null);
+                    }
+                }
+            }
+        }
+        else if(message instanceof wireMessage) {
+            Wire theWire = ((wireMessage) message).getWire();
+            wires.add(theWire);
+            int clm1 = (int)Math.floor(toXCoord(theWire.getxOne())/cellWidth);
+            int rw1 = (int)Math.floor(toYCoord(theWire.getyOne())/cellWidth);
+            int clm2 = (int)Math.floor(toXCoord(theWire.getxTwo())/cellWidth);
+            int rw2 = (int)Math.floor(toYCoord(theWire.getyTwo())/cellWidth);
+            if(cells.get(clm2, rw2) instanceof Operator2I) {
+                if(cells.get(clm2, rw2).getPrev1() == null) {
+                    cells.get(clm2, rw2).setPrev1(cells.get(clm1, rw1));
+                }
+                else {
+                    ((Operator2I) cells.get(clm2, rw2)).setPrev2(cells.get(clm1, rw1));
+                }
+            }
+            else {
+                cells.get(clm2, rw2).setPrev1(cells.get(clm1, rw1));
+            }
+
+            wireMessage undoMessage = new wireMessage(theWire);
+            toUndo.push(undoMessage);
+
+
+
+            //still need to handle when wire color is changed and when wires are deleted !!!!!!!! also still some bugs
+        }
+    }
+
 
     private void drawTriangle(Graphics2D g, int x1, int y1, int x2, int y2){
         double angle = Math.atan2(y2-y1, x2-x1);
@@ -361,14 +544,14 @@ public class Grid extends JPanel implements MouseListener, MouseMotionListener, 
 
     private void selectWire(int select) {
         if(selectedWire == select) {
-            System.out.println("Wire at index "+selectedWire+" unselected!");
+            //System.out.println("Wire at index "+selectedWire+" unselected!");
             wires.get(selectedWire).setSelected(false);
             selectedWire = -1;
             wireIsSelected = false;
         }
         else {
             selectedWire = select;
-            System.out.println("Wire at index "+selectedWire+" selected!");
+            //System.out.println("Wire at index "+selectedWire+" selected!");
 
             for(Wire w : wires) {
                 w.setSelected(wires.indexOf(w) == selectedWire);
@@ -400,8 +583,15 @@ public class Grid extends JPanel implements MouseListener, MouseMotionListener, 
         }
     }
 
+    public SparseMatrix<Operator> getCells(){
+        return cells;
+    }
+
     private void createWire(int c1, int r1, int c2, int r2) {
-        wires.add(new Wire(c1, r1, c2, r2, currentWireColor));
+        Wire wire = new Wire(c1, r1, c2, r2, currentWireColor);
+        wires.add(wire);
+        wireMessage message = new wireMessage(wire);
+        toUndo.push(message);
     }
 
     public int getCellWidth() {
@@ -495,5 +685,72 @@ public class Grid extends JPanel implements MouseListener, MouseMotionListener, 
         zoom(scaleFactor, e.getX(), e.getY());
     }
 
+    public void processUserInput(int k) { //k is key input from kb
+        switch (k) {
+            case KeyEvent.VK_S -> {
+                if (Driver.isControl) {
+                    FileExplorer fileExplorer = new FileExplorer();
+                    File file = fileExplorer.selectFile(false);
+                    if (file.getName().isEmpty()) {
+                        return;
+                    }
+                    String image = "/" + file.getPath().replace("\\", "/");
+
+                    try {
+                        Manager.writeToFile(cells, "Saves/untitled.txt", image);
+                    } catch (Exception ignored) {}
+                }
+            }
+            case KeyEvent.VK_L -> {
+                try {
+                    if (Driver.isControl) {
+                        FileExplorer fileExplorer = new FileExplorer();
+                        File file = fileExplorer.selectFile(true);
+                        if (file.getName().isEmpty()) {
+                            return;
+                        }
+                        cells = Manager.readFile("Saves/" + file.getName());
+                        for (Operator n : cells) {
+                            if (n instanceof Custom) {
+                                for (Operator input : ((Custom) n).getInputs()) {
+                                    if (input.getPrev1() != null) {
+                                        wires.add(new Wire(input.getPrev1().getCol(), input.getPrev1().getRow(), (int) n.getCol(), (int) n.getRow(), input.getColor()));
+                                    }//wires.add(new Wire(c1, r1, c2, r2, currentWireColor)
+                                }
+                            } else {
+                                if (n.getPrev1() != null) {
+                                    wires.add(new Wire(n.getPrev1().getCol(), n.getPrev1().getRow(), (int) n.getCol(), (int) n.getRow(), n.getColor()));
+                                }
+                                if (n instanceof Operator2I && ((Operator2I) n).getPrev2() != null) {
+                                    wires.add(new Wire(((Operator2I) n).getPrev2().getCol(), ((Operator2I) n).getPrev2().getRow(), (int) n.getCol(), (int) n.getRow(), ((Operator2I) n).getColor2()));
+                                }
+                            }
+                        }
+                    }
+                } catch (IOException | ClassNotFoundException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+            case KeyEvent.VK_Z -> {
+                if(Driver.isControl && !toUndo.isEmpty()) {
+                    undo();
+                }
+            }
+            case KeyEvent.VK_Y -> {
+                if(Driver.isControl && !toRedo.isEmpty()) {
+                    redo();
+                }
+            }
+            case KeyEvent.VK_T -> {
+                if (Driver.isControl) {
+                    System.out.println("tutorial");
+                    tutorial.setVisible(!tutorial.isVisible());
+                }
+            }
+        }
+        repaint();
+    }
 
 }
+
+
