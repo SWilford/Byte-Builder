@@ -104,6 +104,7 @@ public class Grid extends JPanel implements MouseListener, MouseMotionListener, 
         tutorialtext.setBackground(Color.DARK_GRAY);
         tutorial.add(tutorialtext);
         tutorial.pack();
+        tutorial.setTitle("Tutorial");
         tutorial.setAlwaysOnTop(true);
         tutorial.setPreferredSize(new Dimension(250, 200));
         Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();

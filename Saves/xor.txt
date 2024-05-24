@@ -1,0 +1,9 @@
+/ImageSaves/XorImage.png
+NotBlock, red, null, 6, 6, (4. 6)
+AndBlock, red, red, 6, 5, (4. 5), (6. 6)
+Input, red, null, 4, 6
+AndBlock, red, red, 6, 8, (4. 6), (6. 7)
+Custom(vedikor), red, null, 8, 6, (6. 5), (6. 8)
+Input, red, null, 4, 5
+NotBlock, red, null, 6, 7, (4. 5)
+Output, red, null, 10, 6, (8. 6)
